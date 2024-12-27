@@ -1,0 +1,112 @@
+<!-- <!DOCTYPE html> -->
+<html>
+  <head>
+    <title>Experiment</title>
+
+    <!--
+      Script:
+
+      Get the prolific ID from the URL
+      Check if this is has been successful - if it is undefined then ask pp to input their ID manually
+      Add the ID to the study session data for this study run
+      If the PPID does not already exist in the batch session data (i.e. new pp) then assign a set of ppVariables in the batch session data
+      The counterbalancing slot allocation is blank for now and will be updated later (better to actually assign later in case pps drop out early)
+
+    -->
+
+
+    <script src="jatos.js"></script>
+    <script src="jspsych-7.3.0/jspsych.js"></script>
+    <script src="jspsych-7.3.0/plugin-survey-text.js"></script>
+    <script src="jspsych-7.3.0/plugin-html-keyboard-response.js"></script>
+    <link href="jspsych-7.3.0/jspsych.css" rel="stylesheet" type="text/css" />
+  </head>
+  <body></body>
+  <script>
+
+      // DEFINE GLOBAL VARIABLES
+      var PPID, pref_exp_grp, pref_CB, pp_CB, pp_expgrp, slots_array, pp_slot, batch_num;
+
+      var jsPsych = initJsPsych({
+        on_finish: function(){
+          jatos.startNextComponent();
+        }
+      });
+
+      var timeline = [];
+
+      // ASK PP TO INPUT ID - this will only appear if the URL retrieval has been unsuccessful
+      var input_ID_trial = {
+        type: jsPsychSurveyText,
+        questions: [
+          {
+            prompt: 'Please enter your Prolific ID:',
+            name: 'pp_input_id',
+            required: true
+          }
+        ],
+        on_finish: function(data){
+          var ppinput = data.response;
+          PPID = ppinput.pp_input_id;
+        }
+      };
+
+      // Checks whether the PPID is undefined (i.e. the URL retrieval was unsuccessful) and if so, executes the text input box
+      var if_node_ID = {
+        timeline: [input_ID_trial],
+        conditional_function: function(){
+
+          if (PPID == undefined){
+            return true //...then show the text input box
+          } else {
+              return false; //...otherwise continue as is
+          }
+        }
+      };
+      timeline.push(if_node_ID);
+
+      // Additional trial to store the PPID in the study session data and run the function to update the batch session data
+      var pause_trial = {
+        type: jsPsychHtmlKeyboardResponse,
+        stimulus: '',
+        trial_duration: 1,
+        on_finish: function(){
+          jatos.studySessionData.PP_ID = PPID; // save ID in study session data for this study run
+          checkStorePPID(); // assign ppvariables in batch
+        }
+      };
+      timeline.push(pause_trial);
+
+
+      // Id the PPID does not already exist in the batch session data (i.e. a new pp) then assign a set of ppVariables
+      function checkStorePPID(){
+
+        // Check if PPID exists in the batch session data (returns true/false)
+        if (!jatos.batchSession.defined("/"+ PPID)){ // If the PPID doesn't already exist
+
+          // STORE CB, SET EXP_GRP TO 5, SET SESSION TRACKER TO 1
+          jatos.batchSession.add("/"+ PPID , {'slot' : null,                  // number 1-16 representing both the CB and expGrp
+                                              'recruitment_run' : null,       // will be set to recruitment stored in study properties
+                                              'counterbalance' : null,        // CB and expGrp are later computed from slot and stored separately - this could all be handled by slot but splitting them out makes it easier when analysing data
+                                              'experimental_group' : null,    // as CB above
+                                              'repeat_tracker' : false,       // think this will be useful for ensuring participants don't repeat the study more than once - it will be changed to TRUE after the encoding task, if pps return their submission and restart then they won't be able to do the session having already seen the words
+                                              'start_time' : null,            // could be useful data
+                                              'comprehension_attempt' : 0 ,   // records number of attempts of instruction comprehension test
+                                              'terminated' : false,           // records whether participant has been terminated
+                                              } )
+            .then(() => console.log("Batch Session was successfully updated"))
+            .catch(() => console.log("Batch Session synchronization failed"));
+
+        }
+      };
+
+      // Run jatos
+      jatos.onLoad(() => {
+        jatos.batchSessionVersioning = false;
+        console.log('assign conds start');
+        PPID = jatos.urlQueryParameters.PROLIFIC_PID; // get prolific ID from the URL
+        jsPsych.run(timeline); // this will show a text input box for the ID if necessary, but will show nothing if the URL was successful
+      });
+
+</script>
+</html>

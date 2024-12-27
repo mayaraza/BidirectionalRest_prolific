@@ -1,0 +1,462 @@
+<!-- <!DOCTYPE html> -->
+<html>
+  <head>
+    <title>Experiment</title>
+
+    <!--
+      This script displays and opening message and conducts some eligibilty checks
+      It checks pps meet inclusions criteria
+      It includes a browser check, setting check, and sound check
+      Prompt to go full screen?
+    -->
+    
+
+    <script src="jatos.js"></script>
+    <script src="jspsych-7.3.0/jspsych.js"></script>
+<!-- load plugins here -->
+
+    <script src="jspsych-7.3.0/plugin-fullscreen.js"></script>
+    <script src="jspsych-7.3.0/plugin-instructions.js"></script>
+    <script src="jspsych-7.3.0/plugin-survey-multi-choice.js"></script>
+    <script src="jspsych-7.3.0/plugin-survey-text.js"></script>
+    <script src="jspsych-7.3.0/plugin-html-keyboard-response.js"></script>
+    <script src="jspsych-7.3.0/plugin-html-button-response.js"></script>
+    <script src="jspsych-7.3.0/plugin-audio-button-response.js"></script>
+    <script src="jspsych-7.3.0/plugin-browser-check-v2.js"></script>
+    <script src="jspsych-7.3.0/plugin-preload.js"></script>
+    <script src="jspsych-7.3.0/plugin-psychophysics-modified.js"></script>
+    <link href="jspsych-7.3.0/jspsych.css" rel="stylesheet" type="text/css" />
+  </head>
+
+  <style> 
+
+		.information-header {
+			position: fixed;
+			width: 100%;
+			top: 0;
+			left: 0;
+			background-color: grey;
+			color: White;
+			text-align: center;
+      padding-bottom: 10px;
+      margin-bottom: 50px;
+		}
+
+		.information-body {
+			width: 700px;
+			height: 450px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+			padding: 10px 50px; 
+			color: black;
+		}
+
+	</style>
+
+
+  <body></body>
+  <script>
+
+
+    // OR jatos
+    var jsPsych = initJsPsych({
+            //use_webaudio: false,
+        		on_finish: function () {
+        			jsPsych.data.addProperties({ subID: jatos.studySessionData.PP_ID });
+              jsPsych.data.addProperties({ taskName: "opening_checks" });
+        			jatos.startNextComponent(jsPsych.data.get().json())
+        		}
+        	});
+
+    var timeline = [];
+
+
+    // DEFINE GLOBAL VARIABLES
+    var PPID, termination_stim, problem, ppVariables;
+    var device_os_problem = null;
+    var display_message = [];
+
+    
+    // DEFINE FUNCTIONS
+    // COMMENT OUT WHAT IS/IS NOT NEEDED
+    function retrieveThings(){
+      // PP BATCH SESSION DATA
+      ppVariables = jatos.batchSession.find("/" + PPID); // returns object containing pp's variables
+
+      // CB
+      //CB = ppVariables['counterbalance'];
+
+      //EXP_GRP
+      //exp_grp = ppVariables['experimental_group'];
+
+      // TASK_NUM COMPONENT PROPS
+      //task_num = jatos.componentJsonInput.task_number;
+    };
+
+    // Display opening message
+    var opening_trial = {
+      type: jsPsychInstructions,
+      pages: [
+        // 0
+        "<div class='information-header'><h1> Overview </h1></div>" + 
+        "<br><hr>" +
+        "<div class='information-body'><p>" +
+        'Thank you for volunteering to take part in our experiment!'+
+        '<br><br>'+
+        'We really appreciate your help - your data will be very helpful for our research.'+
+        "</p></div><hr>",
+
+        // 1
+        "<div class='information-header'><h1> Overview </h1></div>" + 
+        "<br><hr>" +
+        "<div class='information-body'><p>" +
+        "You will have 20-30 minutes of tasks to complete today. No single task will last longer than 5 minutes."+
+        '<br><br>'+
+        "Please complete the tasks in one go without taking breaks, unless where told you may do so."+
+        "</p></div><hr>",
+        
+        // 2
+        "<div class='information-header'><h1> Overview </h1></div>" + 
+        "<br><hr>" +
+        "<div class='information-body'><p>"+
+        "Make sure you are in a <b>familiar setting that is quiet and free from distraction</b>."+
+        '<br>'+
+        '<br>'+
+        "</p></div><hr>",
+        
+        // 3
+        "<div class='information-header'><h1> Overview </h1></div>" + 
+        "<br><hr>" +
+        "<div class='information-body'><p>"+
+        'Some of our tasks are designed to be easy and relaxing, and it may be tempting to get distracted or multi-task.'+
+        '<br><br>'+
+        'Our research depends upon good quality data. So we ask you to please resist temptation, and remain focused for the whole session.'+
+        '<br><br>'+
+        '<b>Please concentrate on the task at hand, and please do not navigate away from the experiment screen, multi-task or get distracted. Try as hard as you can but please do not cheat.</b>'+
+        '<br><br>'+
+        'We really appreciate your efforts!'+
+        "</p></div><hr>",
+
+        // 4
+        "<div class='information-header'><h1> Overview </h1></div>" + 
+        "<br><hr>" +
+        "<div class='information-body'><p>"+
+        'You will now complete some checks, read through instructions for each task and practice some of the tasks.'+
+        '<br><br>'+
+        'Please do not refresh the page or use your browser back buttons throughout.'+
+        "</p></div><hr>"
+      ],
+      show_clickable_nav: true
+    };
+    timeline.push(opening_trial);
+
+
+
+
+
+
+
+
+    // BROWSER SIZE / DEVICE CHECK
+    
+    //ensures pp's screen is enlarged enough and that they are not using a mobile.
+    var browser_trial = {
+      type: jsPsychBrowserCheck,
+      minimum_width: 700,
+      minimum_height: 500,
+      inclusion_function: (data) => {
+          return data.mobile === false && ['chrome'].includes(data.browser); // NOT mobile and ONLY chrome browser
+      },
+      exclusion_message: (data) => {
+          if( data.mobile ){
+            return '<p style ="width:700px">Your device must be a desktop PC or laptop, not a mobile or tablet, for this experiment.</p>';
+              //message only flashes up for a short while :(
+          } else if ( data.browser){
+            return '<p>You must use a Chrome browser (i.e. not Edge, Safari or Firefox) for this experiment.</p>'
+          }
+      }
+    };
+    timeline.push(browser_trial);
+
+
+
+
+
+    // Inclusion criteria check - 18-40 yo
+    var age_Q = {
+      type: jsPsychSurveyText,
+      questions: [
+        {prompt: 'How old are you in years?', name: 'pp_age', placeholder: 'Please enter digits', required: true }
+      ],
+      on_finish: function(data){
+        // Check if 18-40yo
+        var age_response = data.response;
+        age_response = age_response['pp_age'];
+
+        if ( age_response < 18 || age_response > 40 ){
+          problem = true;
+        }
+      }
+    };
+    timeline.push(age_Q);
+
+
+    // Inclusion criteria check - fluent english speaker
+    var language_Q = {
+      type: jsPsychSurveyMultiChoice,
+      questions: [
+        {
+          prompt: "Please select the option that best describes you:", 
+          name: 'pp_language', 
+          options: ['Native English speaker', 'Fluent in English but it is not my first language', 'I speak some English but I am not fluent'], 
+          required: true
+        }
+      ],
+      on_finish: function(data){
+        // Check if Native English speaker
+        var language_response = data.response;
+        language_response = language_response['pp_language'];
+
+        if ( language_response == 'I speak some English but I am not fluent' ){
+          problem = true;
+        }
+      }
+    };
+    timeline.push(language_Q);
+
+
+
+    //   var vision_hearing_Q = {
+    //   type: jsPsychSurveyMultiChoice,
+    //   questions: [
+    //     {
+    //       prompt: "Please select the option that best describes you:", 
+    //       name: 'pp_vision_hearing', 
+    //       options: ['Normal or corrected-to-normal vision and hearing', 'Normal vision but hearing loss', 'Normal hearing but vision loss'], 
+    //       required: true
+    //     }
+    //   ],
+    //   on_finish: function(data){
+    //     var vision_hearing_response = data.response;
+    //     vision_hearing_response = vision_hearing_response['pp_vision_hearing'];
+
+    //     if ( vision_hearing_response != 'Normal or corrected-to-normal vision and hearing' ){
+    //       problem = true;
+    //     }
+    //   }
+    // };
+
+    // var if_node_vision_hearing = {
+    //     timeline: [vision_hearing_Q],
+    //     conditional_function: function(){
+    //       if (day_num == 1){
+    //         return true
+    //       } else return false
+    //     }
+    //   };
+    //   timeline.push(if_node_vision_hearing);
+
+
+
+      // Termination message
+      var inclusion_crit_termination_message_trial = {
+        type: jsPsychHtmlButtonResponse,
+        stimulus: '<div><h3>Your involvement has been terminated.</h3>'+
+              '<p style="width:700px">Unfortunately, you do not meet the inclusion criteria for this study which means you cannot take part. This page should redirect to prolific when you press "Exit". Copy the completion code "CWNUV2BU" just in case.</p><br>'+
+              '</div>',
+        choices: ["Exit"],
+        on_finish: function(){
+
+          ppVariables['terminated'] = true // set the termination log to true
+
+          // UPDATE BATCH SESSION DATA
+          jatos.batchSession.set(PPID, ppVariables)
+            .then(() => console.log("Batch Session was successfully updated"))
+            .catch(() => console.log("Batch Session synchronization failed"));
+
+          // Exit
+          jatos.submitResultData(jsPsych.data.get().json());
+          jatos.endStudyAndRedirect("https://app.prolific.com/submissions/complete?cc=CWNUV2BU");
+        }
+      };
+
+      // conditional timeline for termination message
+      var inclusion_crit_if_node = {
+        timeline: [inclusion_crit_termination_message_trial],
+        conditional_function: function(){
+          if ( problem == true ){
+            return true
+          } else { return false }
+        }
+      };
+      timeline.push(inclusion_crit_if_node);
+
+
+
+
+
+
+
+    // SETTING CHECK
+
+    // Ask pps to report their setting from multiple options
+    var setting_check = {
+        type: jsPsychSurveyMultiChoice,
+        questions: [
+            {
+            prompt: "Which of the following statements best describes the setting you are currently in?", 
+            options: [
+                "A familiar place. It is quiet and there are no distractions.",
+                "A familiar place. There are lots of distractions, it is loud and/or busy.",
+                "A new place I've never spent time in before."], 
+            horizontal: false,
+            required: true,
+            name: 'setting'
+            }
+        ]
+        };
+    timeline.push(setting_check);
+
+    // If setting is not correct, display message to change setting and end experiment.
+    var setting_problem = {
+      type: jsPsychHtmlButtonResponse,
+      stimulus: "<div><p style ='width:700px'>It is very important that you complete this experiment in a quiet and familiar setting, free from distraction. Please restart the experiment from a different setting (click the same link).</p></div>",
+      choices: ['Exit'],
+      on_finish: function(){
+        jatos.submitResultData(jsPsych.data.get().json());
+        jatos.endStudy();
+      }
+    };
+
+    // Check the response given on the setting_check trial, if the setting is wrong then divert to setting_problem, otherwise continue.
+    var if_node_setting = {
+        timeline: [setting_problem],
+        conditional_function: function(){
+            var data = jsPsych.data.get().last(1).values()[0];
+            var setting_response = data.response;
+            if (setting_response.setting == 'A familiar place. It is quiet and there are no distractions.'){
+              return false
+            } else {
+                return true;
+            }
+        }
+    };
+    timeline.push(if_node_setting);
+
+
+
+
+
+
+
+
+
+
+    // SOUND CHECK
+
+    // Set stimuli
+    var sound_stim = './stimuli/instruct_stim/sound_check_1.mp3';
+    var correct_sound = "Birds"
+
+    // Preload
+    var preload_sound = {
+      type: jsPsychPreload,
+      audio: sound_stim, // this may not work when not an array - may need to debug
+    };
+    timeline.push(preload_sound);
+
+    // Sound warning
+    var sound_warning = {
+      type: jsPsychHtmlButtonResponse,
+      stimulus: "<div><p style= width:'700px'>"+
+        "The next screen is an audio check. A sound will play when you click 'Continue'."+
+        "<br>"+
+        "</p></div>",
+      choices: ['Continue']
+    };
+    timeline.push(sound_warning);
+
+    // Play sound
+    var sound_check_trial = {
+      timeline: [{
+        type: jsPsychAudioButtonResponse,
+        stimulus: function(){ return sound_stim },
+        prompt: '<div><p style ="width:700px">'+
+          "<u><b>This experiment involves listening to sounds</b></u>"+
+          "<br><br>"+
+          "Adjust your volume so you can hear the instruction clearly. When you're ready, click 'Continue' to move onto the next screen."+
+          "</p></div>",
+        choices: ['Play again','Continue']
+      }],
+      loop_function: function(data){
+        if(data.values()[0].response == 0){ // If pp clicks 'Play again', repeat trial so sound plays again
+            return true; // loop again!
+        } else {
+            return false; // continue
+        }
+      }
+    };
+    timeline.push(sound_check_trial);
+    
+
+    // Ask pps to report the sound they heard from options
+    var sound_question = {
+        type: jsPsychSurveyMultiChoice,
+        questions: [
+            {
+            prompt: "Select your answer.", 
+            options: [
+                "Cats",
+                "Birds",
+                "Frogs"
+                ], 
+            horizontal: false,
+            required: true,
+            name: 'sound'
+            }
+        ]
+        };
+    timeline.push(sound_question);
+
+    // If answer was incorrect then display message and end experiment.
+    var sound_problem = {
+      type: jsPsychHtmlButtonResponse,
+      stimulus: '<div><p style ="width: 700px">This experiment involves listening to sounds. Please restart the experiment with working audio (click the same experiment link), or contact the experimenter if you have a problem.<br></p></div>',
+      choices: ['Exit'],
+      on_finish: function(){
+        jatos.submitResultData(jsPsych.data.get().json());
+        jatos.endStudy(); 
+      }
+    };
+
+    // Check the response given on the sound_check trial
+    var if_node_sound = {
+        timeline: [sound_problem],
+        conditional_function: function(){
+            var data = jsPsych.data.get().last(1).values()[0];
+            var sound_response = data.response;
+            if (sound_response.sound == correct_sound){
+              return false // If correct, continue with next trial
+            } else {
+                return true; // If incorrect, divert to sound_problem message
+            }
+        }
+    };
+    timeline.push(if_node_sound);
+
+
+
+
+      //jsPsych.run(timeline);
+
+// OR jatos
+    jatos.onLoad(() => {
+      console.log('opening start');
+      PPID = jatos.studySessionData.PP_ID;
+      retrieveThings();
+      jsPsych.run(timeline);
+    });
+
+</script>
+</html>

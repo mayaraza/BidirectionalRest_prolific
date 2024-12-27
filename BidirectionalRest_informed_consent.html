@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+
+<!-- 
+Title: Informed Consent
+Based on a script by Kshipra Gurunandan
+Usage notes: 
+1. Can be used by Rabble (ethics approval CPREC 2020.018)
+2. Required - update study description (starting ~line 125)
+3. Optional - to record Prolific ID, your corresponding Prolific setting should be "I'll use URL parameters"
+4. Optional - update browser checks, especially minimum window size (starting ~line 61)
+Created: April 2023 (updated August 2023)
+-->
+
+<html>
+
+	<head>
+		<title>Welcome</title>
+		<script src="jatos.js"></script>
+		<script src="jspsych-7.3.0/jspsych.js"></script>
+		<script src="jspsych-7.3.0/plugin-html-button-response.js"></script>
+		<script src="jspsych-7.3.0/plugin-instructions.js"></script>
+    	<link href="jspsych-7.3.0/jspsych.css" rel="stylesheet"></link>
+	</head>
+
+	<style> 
+
+		.information-header {
+			position: fixed;
+			width: 100%;
+			top: 0;
+			left: 0;
+			background-color: grey;
+			color: White;
+			text-align: center;
+		}
+
+		.information-body {
+			width: 700px;
+			padding: 10px 50px; 
+			color: black;
+		}
+
+	</style>
+
+	<body></body>
+
+	<script>
+
+		/* Initialize jsPsych */
+		var jsPsych = initJsPsych({
+			on_finish: function() {
+				jsPsych.data.addProperties({ subID: jatos.studySessionData.PP_ID });
+				// jatos.studySessionData["ProlificID"] = jatos.urlQueryParameters.PROLIFIC_PID; // In Prolific, choose the option to get Prolific ID from the url
+				jatos.startNextComponent()
+			}
+		});
+
+		/* Create timeline */
+		var timeline = [];
+
+		/* Information */
+		var information = {
+            type: jsPsychHtmlButtonResponse,
+            stimulus:
+
+                /* Procedural information */
+                "<div class='information-header'><h1> General Information & Consent </h1></div>" + 
+                    "<div class='information-body'>" +
+                    "<br><br><br>"+
+                    "<p> Thank you for taking part in our experiment. </p>" +
+        
+                /* About the study */
+                "<hr><h3> What is the experiment about? </h3>" +
+                        "<p> This experiment is helping us investigate how feelings of pleasantness affect performance on various tasks. </p>" +
+                        "<p> The experiment will last <u>20-30 minutes</u>. </p>" +
+                        "<p> You will see detailed instructions at the beginning of the experiment, and reminders throughout. </p>" +
+
+                /* Researchers */
+                "<br><hr><h3> Who is conducting this study? </h3>" +
+                        "<p> The experiment is conducted by researchers at the <strong>Medical Research Council's Cognition and Brain Sciences Unit (MRC CBU), University of Cambridge.</strong> The Principal Investigator is Professor Rik Henson. </p>" +
+                        "<p> This research study has been approved by the Cambridge Psychology Research Ethics Committee. </p>" +
+                        "<p> You can contact us via <a href='mailto:maya.raza@mrc-cbu.cam.ac.uk' target='_blank'>email</a>. </p>" +
+                
+                /* Data privacy */
+                "<br><hr><h3> What happens to your data? </h3>" +
+                        "<p> We will record your anonymised responses in the course of the experiment and on a short demographic questionnaire (e.g. age). <strong>We will not ask for or collect any information that could be used to identify you.</strong></p>" +
+                        "<p> This anonymised electronic research data will be stored on the hosting site's EU based servers that are compliant with data protection and security policies, and data transfer will be encrypted. </p>" +								
+                        "<p> Information about your device, operating system, and web browser will be accessible to test compatibility with our experiment and ensure a smooth experience. We will not have access to any personally-identifiable information (PID) such as names or IP addresses.</p>" +
+                
+                /* Data controller */
+                "<br><hr><h3> Data controller and sponsor </h3>" +
+                        "<p><strong> This study is sponsored by the University of Cambridge in the United Kingdom. </strong></p>" +
+                        "<p> We will be using information from you in order to undertake this study and will act as the data controller for this. Your rights to access, change or move your information are limited, as we need to manage your information in specific ways in order for the research to be reliable and accurate. If you withdraw from the study, we will keep the information about you that we have already obtained. </p>" +
+                        "<p> To safeguard your rights, we will use the minimum personally-identifiable information possible. You can find out more about how we use your information at <a href='https://www.medschl.cam.ac.uk/research/privacy-notice-how-we-use-your-research-data/'>https://www.medschl.cam.ac.uk/research/privacy-notice-how-we-use-your-research-data/</a> </p>" +
+
+                /* Cookies */
+                "<br><hr><h3> We use cookies </h3>" +
+                        "<p> The experiment requires the use of browser cookies to run propoerly. <strong>These are cleared when you close your browser tab or window </strong>. </p>" +
+                        "<p> By clicking &quotContinue&quot, you agree to the use of cookies. </p>" +
+
+                /* Consent */
+                "<br><hr><h2> Informed Consent </h2>" +
+                        "<p><li> I confirm that I have read and understood the information above. </p>" +
+                        "<p><li> I understand that my participation is voluntary, and that I am free to withdraw at any time, without penalty or affecting my legal rights. </p>" +
+                        "<p><li> I understand that my anonymised research data may be accessed by researchers working at or in collaboration with the MRC Cognition and Brain Sciences Unit. </p>" +
+                        "<p><strong> By clicking &quotContinue&quot, I confirm that I have read the above statements and agree to take part in the study. </strong></p>" +
+                        "<p><i> If you no longer wish to take part, you can exit by closing your web browser window. </i></p>" +
+
+                /* Begin experiment */
+                "<br><hr><h4> Click &quotContinue&quot to begin the experiment </h4>" +
+                    "</div>",
+            // show_clickable_nav: true,
+            // show_page_number: true,
+            choices: ["Continue"]
+		};
+		timeline.push(information);
+
+		/* Start the script */
+		jatos.onLoad(() => {
+		  	jsPsych.run(timeline);
+		});
+
+	</script>
+</html>
