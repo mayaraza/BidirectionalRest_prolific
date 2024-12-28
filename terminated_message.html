@@ -1,0 +1,55 @@
+<!-- <!DOCTYPE html> -->
+<html>
+  <head>
+    <title>Experiment</title>
+
+    <!--
+      Tells pp they have been terminated, to prevent pps from trying to rejoin the experiment after termination.
+    -->
+    
+
+    <script src="jatos.js"></script>
+    <script src="jspsych-7.3.0/jspsych.js"></script>
+<!-- load plugins here -->
+
+    <script src="jspsych-7.3.0/plugin-html-button-response.js"></script>
+
+    <link href="jspsych-7.3.0/jspsych.css" rel="stylesheet" type="text/css" />
+  </head>
+
+
+  <body></body>
+  <script>
+
+    // OR jatos
+    var jsPsych = initJsPsych({
+        		on_finish: function () {
+        			jsPsych.data.addProperties({ subID: jatos.studySessionData.PP_ID });
+        			jatos.endStudy(jsPsych.data.get().json())
+        		}
+        	});
+
+    var timeline = [];
+
+    var PPID;
+
+
+    var termination_message = {
+        type: jsPsychHtmlButtonResponse,
+        stimulus: '<div><h1>Your involvement has been terminated.</h1>'+
+          '<p style="width:900px" >Sorry, you cannot complete this experiment. Contact the experimenter if you believe this is an error.</p><br>'+
+          '</div>',
+        choices: ["Exit"],
+      };
+      timeline.push(termination_message);
+
+
+// OR jatos
+    jatos.onLoad(() => {
+      console.log('terminated start');
+      PPID = jatos.studySessionData.PP_ID;
+      jsPsych.run(timeline);
+    });
+
+</script>
+</html>
