@@ -40,7 +40,7 @@
         type: jsPsychSurveyText,
         questions: [
           {
-            prompt: 'Please enter your Prolific ID:',
+            prompt: 'Please enter the ID you have been given by the experimenter (or Prolific ID):',
             name: 'pp_input_id',
             required: true
           }
@@ -89,7 +89,7 @@
                                               'recruitment_run' : null,       // will be set to recruitment stored in study properties
                                               'counterbalance' : null,        // CB and expGrp are later computed from slot and stored separately - this could all be handled by slot but splitting them out makes it easier when analysing data
                                               'experimental_group' : null,    // as CB above
-                                              'repeat_tracker' : false,       // think this will be useful for ensuring participants don't repeat the study more than once - it will be changed to TRUE after the encoding task, if pps return their submission and restart then they won't be able to do the session having already seen the words
+                                              'repeatable' : true,            // sets to false after encoding or spot the difference task, bc if pps return their submission and restart then they won't be able to do the session having already seen the words and pictures, but could feasibly repeat 
                                               'start_time' : null,            // could be useful data
                                               'comprehension_attempt' : 0 ,   // records number of attempts of instruction comprehension test
                                               'terminated' : false,           // records whether participant has been terminated

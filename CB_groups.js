@@ -7,10 +7,10 @@ var experimental_grps = {
     4 : "EE"    // effort effort
 };
 
-// Determines word list
+// Determines word list shown during encoding task
 var counterbalance_grps = {
-    1 : "",
-    2 : "",
-    3 : "",
-    4 : ""
+    1 : "A",
+    2 : "B",
+    3 : "C",
+    4 : "D"
 };
