@@ -1,0 +1,218 @@
+<!-- <!DOCTYPE html> -->
+<html>
+  <head>
+    <title>Experiment</title>
+
+    <!-- This script gives pps detailed instructions at the start of the experiment and gives practice trials for the TFD and ecnoding tasks.
+    There is also a comprehension check to make sure they understand. They get two attempts at this test.
+    If they get everything right, they can progress. If they get any answers incorrect on their 2nd attempt, the experiment will end. -->
+    
+
+    <script src="jatos.js"></script>
+    <script src="jspsych-7.3.0/jspsych.js"></script>
+<!-- load plugins here -->
+    <script src="jspsych-7.3.0/plugin-survey-multi-choice.js"></script>
+    <script src="jspsych-7.3.0/plugin-html-keyboard-response-modified.js"></script>
+    <script src="jspsych-7.3.0/plugin-html-button-response.js"></script>
+    <script src="jspsych-7.3.0/plugin-instructions.js"></script>
+    <script src="jspsych-7.3.0/plugin-preload.js"></script>
+    <link href="jspsych-7.3.0/jspsych.css" rel="stylesheet" type="text/css" />
+  </head>
+
+  <style> 
+
+		.information-header {
+			position: fixed;
+			width: 100%;
+			top: 0;
+			left: 0;
+			background-color: grey;
+			color: White;
+			text-align: center;
+      padding-bottom: 10px;
+      margin-bottom: 50px;
+		}
+
+		.information-body {
+			width: 700px;
+			height: 450px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+			padding: 10px 50px; 
+			color: black;
+		}
+
+	</style>
+
+  <body></body>
+  <script>
+
+
+      // OR jatos
+      var jsPsych = initJsPsych({
+          		on_finish: function () {
+          			jsPsych.data.addProperties({ subID: jatos.studySessionData.PP_ID });
+                jsPsych.data.addProperties({ taskName: "comp_test" });
+          			jatos.startNextComponent(jsPsych.data.get().json())
+          		}
+          	});
+
+      var timeline = [];
+      var PPID;
+
+      // Comprehension test
+
+      var comprehension_instruct = {
+        type: jsPsychHtmlButtonResponse,
+        stimulus: "<div class='information-header'><h1> Instructions </h1></div>" + 
+          "<br><hr>" +
+          "<div class='information-body'><p>" +
+          'Now some quick questions to check you understand the task instructions.'+
+          "</p></div><hr>",
+        choices: ['Continue']
+      };
+      timeline.push(comprehension_instruct);
+
+
+      var problem, attempt;
+     
+     
+
+      var comprehension_test = {
+        type: jsPsychSurveyMultiChoice,
+        questions: [
+          {
+            prompt: "<div><h3>During the Relaxation Task, you must press the space bar...</h3></div>", 
+            name: 'TFD_test_1', 
+            options: ['When you hear a piano note, see the cross change from red to black, or see the cross change from black to red.', 'Only when you hear a piano note.', 'Only when you see the cross change colour.'], 
+            required: true
+          },
+          {
+            prompt: "<div><h3>Regarding the Relaxation task,...</h3></div>", 
+            name: 'TFD_test_2', 
+            options: ['This is an opportunity to relax, so I can use my phone while I wait for it to end.', 'Despite being a simple task, I must remain focused on the screen and not multi-task.', 'I can open other browser tabs during this task, as long as I check the task screen every so often.'], 
+            required: true
+          },
+          {
+            prompt: "<div><h3>During the Spot-the-difference Task, XXXX...</h3></div>", 
+            name: 'spotdiff_test', 
+            options: ['XXXXX','XXXX', 'XXXXX'], 
+            required: true
+          },
+          {
+            prompt: "<div><h3>During the Pleasantness Task, the goal is...</h3></div>", 
+            name: 'encoding_test', 
+            options: ['To give your opinion on how pleasant you find each word - there are no correct answers.','To correctly guess how pleasant most people find each word.'], 
+            required: true
+          },
+        ],
+        on_finish: function(data){
+          // log one attempt in the batch session data
+          var ppVariables = jatos.batchSession.find("/" + PPID) // returns object containing pp's variables
+          ppVariables['comprehension_attempt'] = ppVariables['comprehension_attempt'] + 1; // add 1 to the tracker within the object
+          attempt = ppVariables['comprehension_attempt'];
+
+          // Check whether all the responses are correct, if any are incorrect make problem 1
+          // I had to use stringify to make the comparison work
+          if (JSON.stringify(data.response) == JSON.stringify({
+                                                                TFD_test_1: 'When you hear a piano note, see the cross change from red to black, or see the cross change from black to red.', 
+                                                                TFD_test_2: 'Despite being a simple task, I must remain focused on the screen and not multi-task.', 
+                                                                spotdiff_test: 'XXXXX',
+                                                                encoding_test: 'To give your opinion on how pleasant you find each word - there are no correct answers.', 
+                                                              })){
+            problem = 0 ;
+          } else {
+            problem = 1 ;
+          }
+
+          // Update termination tracker so that pp cant just restart experiment, experimenter can reset termination tracker using other script
+          if ( attempt > 1 && problem == 1){
+            ppVariables['terminated'] = true
+          }
+
+          // // UPDATE BATCH SESSION DATA
+          jatos.batchSession.set(PPID, ppVariables)
+            .then(() => console.log("Batch Session was successfully updated"))
+            .catch(() => console.log("Batch Session synchronization failed"));
+        }
+      };
+      timeline.push(comprehension_test);
+
+
+
+
+      // RESTART
+
+      var restart_message = {
+        type: jsPsychHtmlButtonResponse,
+        stimulus: "<div><p style ='width:700px'>You didn't get all of the answers correct. Please read through the instructions again to make sure you understand. It is very important for our research that you fully understand the instructions before beginning the experiment.</p></div>",
+        choices: ['Instructions'],
+        on_finish: function(){
+          jatos.startComponentByPos(7, jsPsych.data.get().json()) // instructions practice component position so pps can read instructions again
+        }
+      };
+      // Not added to timeline bc this is conditional
+
+      var comprehension_if_node_restart = {
+        timeline: [restart_message],
+        on_start: function(){
+          console.log('got to restart if node');
+        },
+        conditional_function: function(){
+          // If pp failed but has only made 1 attempt, restart instructions component
+          if (problem == 1 && attempt == 1){
+            return true // restart instructions
+          } else {
+              return false;
+          }
+        }
+      };
+      timeline.push(comprehension_if_node_restart);
+
+
+
+
+      // 2 FAILED ATTEMPTS
+
+      var comprehension_problem = {
+        type: jsPsychHtmlButtonResponse,
+        stimulus: "<div><p style ='width:700px'>It is very important for our research that you fully understand the instructions before beginning the experiment. Please contact the experimenter so we can explain / answer any questions. Then you can continue with the experiment. This page should redirect you to Prolific when you press 'Exit'. Copy the completion code 'C1LEQHRN' just in case.</p></div>",
+        choices: ['Exit'],
+        on_finish: function(){
+          jatos.submitResultData(jsPsych.data.get().json());
+          jatos.endStudyAndRedirect("https://app.prolific.com/submissions/complete?cc=C1LEQHRN"); // Should redirect and save pp to failed comprehension check group
+        }
+      };
+      // Not added to timeline bc this is conditional
+
+      var comprehension_if_node_abort = {
+        timeline: [comprehension_problem],
+        conditional_function: function(){
+          // If pp failed twice then show termination message
+          if (problem == 1 && attempt > 1){
+            return true // abort message
+          } else {
+              return false;
+          }
+        }
+      };
+      timeline.push(comprehension_if_node_abort);
+
+
+      
+
+
+
+      //jsPsych.run(timeline);
+
+// OR jatos
+      jatos.onLoad(() => {
+        jatos.batchSessionVersioning = false;
+        console.log('comp test start');
+        PPID = jatos.studySessionData.PP_ID;
+        jsPsych.run(timeline);
+      });
+
+</script>
+</html>

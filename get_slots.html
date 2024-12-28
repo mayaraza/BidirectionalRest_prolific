@@ -1,0 +1,134 @@
+<!-- <!DOCTYPE html> -->
+<html>
+  <head>
+    <title>Experiment</title>
+
+    <!--
+      Script:
+      This script gets the prolific ID from the URL and stores it in the study session data
+      Checks if the PPID exists in the batch session data - (if yes then it does nothing and if no...)
+
+      For new pps it gets a slot...
+      Check if a preferential slot has been set in the component json input - if yes use this and leave slots alone, if no...
+      Get the slots available from the batch session data, remove one slot, and return the array to the batch session data
+      Add the slot to the study session data.
+      Send the slot array and the ppVariables object back to the batch session data
+      
+      This script did not work with batch versioning switched off
+    -->
+
+
+    <script src="jatos.js"></script>
+    <script src="jspsych-7.3.0/jspsych.js"></script>
+
+    <!-- <script src="jspsych-7.3.0/plugin-html-keyboard-response.js"></script>
+    <script src="jspsych-7.3.0/plugin-html-button-response.js"></script>
+    <script src="jspsych-7.3.0/plugin-survey-text.js"></script>
+    <script src="jspsych-7.3.0/plugin-survey-multi-choice.js"></script>
+
+    <link href="jspsych-7.3.0/jspsych.css" rel="stylesheet" type="text/css" /> -->
+
+  </head>
+  <body></body>
+  <script>
+
+
+      // var jsPsych = initJsPsych({
+      //   experiment_width: 700,
+      //   on_finish: function () {
+      //     jatos.startNextComponent();
+      //   }
+      // });
+
+      // var timeline = [];
+
+      // var pause = {
+      //   type: jsPsychHtmlKeyboardResponse,
+      //   stimulus: 'pause',
+      //   choices: [' '],
+      // };
+      // timeline.push(pause);
+
+      // DEFINE GLOBAL VARIABLES
+      var PPID, ppVariables, pref_exp_grp, pref_CB, pp_CB, pp_expgrp, slots_array, pp_slot, slot_assigned;
+
+
+      function retrieveThings(){
+
+        //other variables
+        pref_slot = jatos.componentJsonInput.preference_slot;
+
+        // get the pp's batch session data
+        ppVariables = jatos.batchSession.find("/" + PPID); // returns object containing pp's variables
+
+        // finds the slot currently assigned
+        pp_slot = ppVariables['slot'];
+
+      };
+
+      function getSlots(){
+        
+        slots_array = jatos.batchSession.find("/slots_available"); 
+        //console.log(slots_array);
+      };
+
+      function assignSlot(){
+
+        // Check if the pp already has a slot assigned
+        if (pp_slot == null ){ // if slot is null (i.e. not yet assigned) then assign a slot
+
+          if ( pref_slot != null ){ // if a prefential slot has been set then assign this
+            
+            //set the prefential slot and leave the slots array alone
+            slot_assigned = pref_slot;
+
+          } else { // If no preferential slot has been used then allocate a slot from the slots array
+
+            // get the first slot and remove it from the array
+            slot_assigned = slots_array.splice(0, 1)[0];
+
+            console.log(slots_array);
+            console.log(pp_slot);
+
+          }
+
+          // set the slot in the pp's batch object
+          ppVariables['slot'] = slot_assigned;
+
+          // There are 16 slots based on the 4 experimental groups and the 4 counterbalance conditions
+          // Everything could be handled with the slot value but splitting it out in the batch session data is easier for data analysis later
+
+          // Work out the CB from the slot
+          pp_CB = ((slot - 1) % 4) + 1;
+          ppVariables['counterbalance'] = pp_CB;
+
+          // Work out the exp_grp from the slot
+          pp_expgrp = Math.floor((slot_assigned - 1) / 4) + 1;
+          ppVariables['experimental_group'] = pp_expgrp;
+
+        }
+      };
+
+      function returnSlots(){
+        // return slots array and ppVariables to the batch session data
+        jatos.batchSession.set("slots_available", slots_array)
+            .then(() => jatos.batchSession.set(PPID, ppVariables)) // to update multiple objects in the batch session data you have to use .then()
+            .then(() => console.log("Batch Session was successfully updated"))
+            .catch(() => console.log("Batch Session synchronization failed"));
+      };
+
+      // Run jatos
+      jatos.onLoad(() => {
+        //jatos.batchSessionVersioning = false; // didn't work with versioning switched off
+        console.log('get slots start');
+        PPID = jatos.studySessionData.PP_ID;
+        retrieveThings();
+        getSlots();
+        assignSlot();
+        returnSlots();
+        //jsPsych.run(timeline);
+        jatos.startNextComponent();
+      });
+
+</script>
+</html>

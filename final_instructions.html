@@ -1,0 +1,164 @@
+<!-- <!DOCTYPE html> -->
+<html>
+  <head>
+    <title>Experiment</title>
+
+    <!-- This script gives pps detailed instructions at the start of the experiment and gives practice trials for the TFD and ecnoding tasks.
+    There is also a comprehension check to make sure they understand. They get two attempts at this test.
+    If they get everything right, they can progress. If they get any answers incorrect on their 2nd attempt, the experiment will end. -->
+    
+
+    <script src="jatos.js"></script>
+    <script src="jspsych-7.3.0/jspsych.js"></script>
+<!-- load plugins here -->
+    <script src="jspsych-7.3.0/plugin-survey-multi-choice.js"></script>
+    <script src="jspsych-7.3.0/plugin-html-keyboard-response-modified.js"></script>
+    <script src="jspsych-7.3.0/plugin-html-button-response.js"></script>
+    <script src="jspsych-7.3.0/plugin-instructions.js"></script>
+    <script src="jspsych-7.3.0/plugin-preload.js"></script>
+    <script src="jspsych-7.3.0/plugin-psychophysics-modified.js"></script>
+    <script src="jspsych-7.3.0/plugin-fullscreen.js"></script>
+    <link href="jspsych-7.3.0/jspsych.css" rel="stylesheet" type="text/css" />
+  </head>
+
+  <style> 
+
+		.information-header {
+			position: fixed;
+			width: 100%;
+			top: 0;
+			left: 0;
+			background-color: grey;
+			color: White;
+			text-align: center;
+      padding-bottom: 10px;
+      margin-bottom: 50px;
+		}
+
+		.information-body {
+			width: 700px;
+			height: 450px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+			padding: 10px 50px; 
+			color: black;
+		}
+
+	</style>
+
+  <body></body>
+  <script>
+
+
+      // OR jatos
+      var jsPsych = initJsPsych({
+          		on_finish: function () {
+          			jsPsych.data.addProperties({ subID: jatos.studySessionData.PP_ID });
+                jsPsych.data.addProperties({ taskName: "final_instruct" });
+                updateStartTime();
+          			jatos.startNextComponent(jsPsych.data.get().json())
+          		}
+          	});
+
+      var timeline = [];
+      var PPID;
+
+/*       // Function to save the session start time in the batch session data
+      function updateStartTime(){
+
+        // FETCH CURRENT TIME
+        var current_time = Date.now();
+
+        // LOG DAY1 START TIME
+          ppVariables['day1_start_time'] = current_time;
+
+        // UPDATE BATCH SESSION DATA
+        jatos.batchSession.set(PPID, ppVariables)
+          .then(() => console.log("Batch Session was successfully updated"))
+          .catch(() => console.log("Batch Session synchronization failed"));
+      };
+ */
+
+      var overall_instruct = {
+        type: jsPsychInstructions,
+        pages: [
+          // Final page 1
+          "<div class='information-header'><h1> Instructions </h1></div>" + 
+          "<br><hr>" +
+          "<div class='information-body'><p>" +
+          "Great! You're nearly ready to begin."+
+          "</p></div><hr>",
+
+          //Final page2 - could remove as duplication with opening
+          "<div class='information-header'><h1> Instructions </h1></div>" + 
+          "<br><hr>" +
+          "<div class='information-body'><p>" +
+          'As mentioned, our research depends upon you being fully engaged and concentrating. Especially during simple or relaxing tasks.'+
+          '<br>'+
+          '<br>'+
+          '<b>Please concentrate on the task at hand, please do not multi-task or get distracted. Try as hard as you can but please do not cheat.</b>'+
+          '<br><br>'+
+          "</p></div><hr>",
+
+          // Final page3
+          "<div class='information-header'><h1> Instructions </h1></div>" + 
+          "<br><hr>" +
+          "<div class='information-body'><p>" +
+          'Throughout the study, your responses to the tasks will be monitored to ensure you are paying attention. For example, if you do not respond during a task or if you respond randomly/continously then you may be flagged as inattentive, and your involvement may be terminated.'+
+          '<br><br>'+
+          'You should not be flagged for genuine errors. The checks are simple and you will pass them if you remain focused on the tasks.'+
+          "</p></div><hr>",
+
+          // Final page4
+          "<div class='information-header'><h1> Instructions </h1></div>" + 
+          "<br><hr>" +
+          "<div class='information-body'><p>" +
+          'Once the session has begun, avoid clicking off the experiment screen as this may affect how your responses are recorded and could lead to your involvement being terminated.'+
+          '<br><br>'+
+          "</p></div><hr>",
+
+          // Final page6
+          "<div class='information-header'><h1> Instructions </h1></div>" + 
+          "<br><hr>" +
+          "<div class='information-body'><p>" +
+          'Now is a good time for a break if you need one before you begin.'+
+          '<br><br>'+
+          "Click to begin the tasks!"+
+          "</p></div><hr>",
+        ],
+        show_clickable_nav: true,
+        allow_backward: true
+      };
+      timeline.push(overall_instruct);
+
+
+
+      // Full screen plugin doesn't seem to work bc it reverts to non-full screen when the component ends
+      var enter_full_screen = {
+        type: jsPsychFullscreen,
+        fullscreen_mode: true,
+        message: "<div class='information-header'><h1> Instructions </h1></div>" + 
+          "<br><hr>" +
+          "<div class='information-body'><p>" +
+          "Please enter full screen mode for the remainder of the session."+
+          "<br></p></div><hr>",
+        button_label: ['Full Screen']
+      };
+      //timeline.push(enter_full_screen);
+      
+
+
+
+      //jsPsych.run(timeline);
+
+// OR jatos
+      jatos.onLoad(() => {
+        jatos.batchSessionVersioning = false;
+        console.log('final opening instructions start');
+        PPID = jatos.studySessionData.PP_ID;
+        jsPsych.run(timeline);
+      });
+
+</script>
+</html>
