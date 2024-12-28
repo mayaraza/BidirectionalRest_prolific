@@ -1,0 +1,410 @@
+<!-- <!DOCTYPE html> -->
+<html>
+  <head>
+    <title>Experiment</title>
+
+    <!-- 
+      Ask about arousal rating, thinking about words depending on day 1 or 2 and exp_grp.
+     -->
+
+    <script src="jatos.js"></script>
+    <script src="jspsych-7.3.0/jspsych.js"></script>
+<!-- load plugins here -->
+    <script src="jspsych-7.3.0/plugin-html-button-response.js"></script>
+    <script src="jspsych-7.3.0/plugin-preload.js"></script>
+    <script src="jspsych-7.3.0/plugin-survey-likert-modified.js"></script>
+    <script src="jspsych-7.3.0/plugin-html-keyboard-response.js"></script>
+    <link href="jspsych-7.3.0/jspsych.css" rel="stylesheet" type="text/css" />
+  </head>
+
+  <style> 
+
+		.information-header {
+			position: fixed;
+			width: 100%;
+			top: 0;
+			left: 0;
+			background-color: grey;
+			color: White;
+			text-align: center;
+      padding-bottom: 10px;
+      margin-bottom: 50px;
+		}
+
+		.information-body {
+			width: 700px;
+			height: 450px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+			/* padding: 10px 50px;  */
+			color: black;
+		}
+
+	</style>
+
+  <body></body>
+  <script>
+
+
+      // var jsPsych = initJsPsych({
+      //       experiment_width: 700,
+      //       on_finish: function() {
+      //       jsPsych.data.displayData();
+      //     }
+      //     });
+
+
+      // OR jatos
+      var jsPsych = initJsPsych({
+        experiment_width: 700,
+        on_finish: function () {
+          jsPsych.data.addProperties({ subID: jatos.studySessionData.PP_ID });
+          jsPsych.data.addProperties({ expGrp: exp_grp });
+          jsPsych.data.addProperties({ taskName: "post_questions" });
+          jatos.startComponentByPos( redirectComp, jsPsych.data.get().json())
+        }
+      });
+
+      var timeline = [];
+
+
+      // DEFINE GLOBAL VARIABLES
+      var PPID, ppVariables, exp_grp;
+      var task_flow_img, pre_task, post_task;
+
+      // DEFINE FUNCTIONS
+      function retrieveThings(){
+        // PP BATCH SESSION DATA
+        ppVariables = jatos.batchSession.find("/" + PPID); // returns object containing pp's variables
+
+        //EXP_GRP
+        exp_grp = ppVariables['experimental_group'];
+
+      };
+
+
+      // Images of the task flow for use in question instructions
+      var instruct_images = [
+        './stimuli/instruct_stim/RR_img.jpg',
+        './stimuli/instruct_stim/RE_img.jpg',
+        './stimuli/instruct_stim/ER_img.jpg',
+        './stimuli/instruct_stim/EE_img.jpg'
+        ];
+
+      // Preload images for use in the question instructions
+      var img_preload = {
+        type: jsPsychPreload,
+        images: instruct_images
+      };
+      timeline.push(img_preload);
+
+      // Set the stimuli depending on expGrp
+      var set_think = {
+        type: jsPsychHtmlKeyboardResponse,
+        stimulus: ' ',
+        choices: "NO_KEYS",
+        trial_duration: 1,
+        on_finish: function(){
+
+          if (expGrp == 1){           // RR
+            task_flow_img = instruct_imges[0];
+            pre_task = "1st Relaxation";
+            post_task = "2nd Relaxation";
+
+          } else if (expGrp == 2){    // RE
+            task_flow_img = instruct_imges[1];
+            pre_task = "Relaxation";
+            post_task = "Spot the difference";
+
+          } else if (expGrp == 3){    // ER
+            task_flow_img = instruct_imges[2];
+            pre_task = "Spot the difference";
+            post_task = "Relaxation";
+
+          } else if (expGrp == 4){    // EE
+            task_flow_img = instruct_imges[3];
+            pre_task = "1st Spot the difference";
+            post_task = "2nd Spot the difference";
+
+          }
+        }
+      };
+      timeline.push(set_think);
+
+      // Intro message
+      var intro_post_qs = {
+        type: jsPsychHtmlButtonResponse,
+        stimulus: function(){ return "<div class='information-header'><h1> Questions </h1></div>"+
+          "<br><hr>" +
+          "<div class='information-body'><p>" +
+          'Now for some quick questions about the tasks you completed today:'+
+          '<br><br>'+
+          "<img src='"+ instruct_img +"'width='700px'>"+
+          '<br><br>'+
+          'Please note that you may not have completed all the tasks you received instructions for at the start of the experiment.'
+          "</p></div><hr>"
+        },
+        choices: ['Continue']
+      };
+      timeline.push(intro_post_qs);
+
+
+      // Memory test Q
+      var memory_Q = {
+        type: jsPsychSurveyLikert,
+        preamble: "<div>test</div>",
+        questions: [
+          {
+            prompt: "<div>The final task tested your memory for the words you saw earlier. Did you expect to receive this test?</div>",
+            name: "expect_recall",
+            labels: [
+              "Yes, I expected my memory for the words to be tested.",
+              "No, the word memory test was a surprise to me."
+            ],
+            required: true
+          }
+        ]
+      };
+      timeline.push(memory_Q);
+
+
+      // Word think Qs
+      var word_Qs = {
+        type: jsPsychSurveyLikert,
+        preamble: function(){ return "<div><p style='width:700px'>"+
+          "<br>"+
+          "After the Pleasantness task, where you saw some words, you completed the "+ post_task + " task. During this task..."+ // set at the start of script depending upon day_num and exp_grp
+          "<br>"+
+          "</p></div>"
+        },
+        questions: [
+        {
+            prompt: "<div><h4>How often did you think about the words?</h4></div>",
+            name: "word_freq",
+            labels: [
+              "The entire time", 
+              "Most of the time",
+              "A good deal of the time",
+              "Some of the time",
+              "Barely any of the time",
+              "None of the time"
+            ],
+            required: true
+        },
+        {
+            prompt: "<div><h4>'The words spontaneously popped into my head.' Do you agree?</h4></div>",
+            name: "word_spontaneous",
+            labels: [
+              "Strongly agree",
+              "Agree",
+              "Somewhat agree", 
+              "Somewhat disagree",
+              "Disagree",
+              "Strongly disagree"
+            ],
+            required: true
+        },
+        {
+            prompt: "<div><h4>'I deliberately rehearsed the words in my head.' Do you agree?</h4></div>",
+            name: "word_rehearsal",
+            labels: [
+              "Strongly agree",
+              "Agree",
+              "Somewhat agree", 
+              "Somewhat disagree",
+              "Disagree",
+              "Strongly disagree"
+            ],
+            required: true
+        },
+        {
+            prompt: "<div><h4>'I deliberately avoided thinking about the words. If they came to mind, I tried to push them out of my thoughts.' Do you agree?</h4></div>",
+            name: "word_suppression",
+            labels: [
+              "Strongly agree",
+              "Agree",
+              "Somewhat agree", 
+              "Somewhat disagree",
+              "Disagree",
+              "Strongly disagree"
+            ],
+            required: true
+        }
+        ],
+        data: { wordthinkQ : function(){ return post_task }} // Store task pps have been instructed to refer to, for reference
+      };
+      timeline.push(word_Qs);
+
+
+      // Arousal Qs
+      var arousal_Qs = {
+        type: jsPsychSurveyLikert,
+        preamble: "<div><p style='width:700px'>"+
+          "The following questions refer to the level of arousal you felt during the session. <b>Arousal refers to your general level of alertness, excitement or energy.</b>"+
+          "<br><br>"+
+          "</p></div>", // may need to go in a function?
+        questions: [
+          {
+            prompt: "<div><h4>The Video Task</h4></div>",
+            name: "pre_arousal",
+            labels: [
+              "Very aroused",
+              "Aroused",
+              "Somewhat aroused",
+              "Somewhat calm",
+              "Calm",
+              "Very calm"
+            ],
+            required: true
+          },
+          {
+            prompt: function(){ return "<div><h4>The "+ pre_task +" Task</h4></div>" },
+            name: "pre_arousal",
+            labels: [
+              "Very aroused",
+              "Aroused",
+              "Somewhat aroused",
+              "Somewhat calm",
+              "Calm",
+              "Very calm"
+            ],
+            required: true
+          },
+          {
+            prompt: "<div><h4>The Pleasantness Task</h4></div>",
+            name: "encoding_arousal",
+            labels: [
+              "Very aroused",
+              "Aroused",
+              "Somewhat aroused",
+              "Somewhat calm",
+              "Calm",
+              "Very calm"
+            ],
+            required: true
+          },
+          {
+            prompt: function(){ return "<div><h4>The "+ post_task +" Task</h4></div>" },
+            name: "post_arousal",
+            labels: [
+              "Very aroused",
+              "Aroused",
+              "Somewhat aroused",
+              "Somewhat calm",
+              "Calm",
+              "Very calm"
+            ],
+            required: true
+          },
+          {
+            prompt: "<div><h4>The Memory Task</h4></div>",
+            name: "memory_arousal",
+            labels: [
+              "Very aroused",
+              "Aroused",
+              "Somewhat aroused",
+              "Somewhat calm",
+              "Calm",
+              "Very calm"
+            ],
+            required: true
+          }
+        ]
+      };
+      timeline.push(arousal_Qs);
+
+
+      
+      // Arousal Qs
+      var arousal_Qs = {
+        type: jsPsychSurveyLikert,
+        preamble: "<div><p style='width:700px'>"+
+          "The following questions refer to how effortful you found each task e.g. an effortful task may feel like it required a lot of <b>'brain power', focus, attention or energy</b>."+
+          "<br><br>"+
+          "</p></div>", // may need to go in a function?
+        questions: [
+          {
+            prompt: "<div><h4>The Video Task</h4></div>",
+            name: "pre_effort",
+            labels: [
+              "Very effortful",
+              "Effortful",
+              "Somewhat effortful",
+              "Somewhat easy",
+              "Easy",
+              "Very easy"
+            ],
+            required: true
+          },
+          {
+            prompt: function(){ return "<div><h4>The "+ pre_task +" Task</h4></div>" },
+            name: "pre_effort",
+            labels: [
+              "Very effortful",
+              "Effortful",
+              "Somewhat effortful",
+              "Somewhat easy",
+              "Easy",
+              "Very easy"
+            ],
+            required: true
+          },
+          {
+            prompt: "<div><h4>The Pleasantness Task</h4></div>",
+            name: "encoding_effort",
+            labels: [
+              "Very effortful",
+              "Effortful",
+              "Somewhat effortful",
+              "Somewhat easy",
+              "Easy",
+              "Very easy"
+            ],
+            required: true
+          },
+          {
+            prompt: function(){ return "<div><h4>The "+ post_task +" Task</h4></div>" },
+            name: "post_effort",
+            labels: [
+              "Very effortful",
+              "Effortful",
+              "Somewhat effortful",
+              "Somewhat easy",
+              "Easy",
+              "Very easy"
+            ],
+            required: true
+          },
+          {
+            prompt: "<div><h4>The Memory Task</h4></div>",
+            name: "memory_effort",
+            labels: [
+              "Very effortful",
+              "Effortful",
+              "Somewhat effortful",
+              "Somewhat easy",
+              "Easy",
+              "Very easy"
+            ],
+            required: true
+          }
+        ]
+      };
+      timeline.push(effort_Qs);
+
+
+
+      //jsPsych.run(timeline);
+
+// OR jatos
+      jatos.onLoad(() => {
+        jatos.batchSessionVersioning = false;
+        console.log('post Qs start');
+        PPID = jatos.studySessionData.PP_ID;
+        retrieveThings();
+        jsPsych.run(timeline);
+      });
+
+</script>
+</html>
