@@ -1,0 +1,116 @@
+<!-- <!DOCTYPE html> -->
+<html>
+  <head>
+    <title>Experiment</title>
+
+    <!--
+      Script:
+
+      Create a new randomised slot array
+      Check the component input for...
+        slots required - add more of these to the new array
+        slots not required - remove these from the new array
+      Check if there is a slots array already defined in the batch session data
+      If yes then merge the new array with the existing one
+      If no just use the newly created one
+      Update the batch session data
+    
+    -->
+
+
+    <script src="jatos.js"></script>
+  </head>
+  <body></body>
+  <script>
+
+    // DEFINE GLOBAL VARIABLES
+    var full_sixteen, slots_required, slots_not_required, new_slots, slots_existing, slots_array;
+
+
+    // DEFINE FUNCTIONS
+
+    function retrieveThings(){
+
+      // Should all 16 slots be added or only those required
+      full_sixteen = jatos.componentJsonInput.fullsixteen;
+
+      // slots required from component input
+      slots_required = jatos.componentJsonInput.required;
+
+      // slots not required from component input
+      slots_not_required = jatos.componentJsonInput.not_required;
+    };
+
+    // Called within the add_slots function to write out full array of slots available
+    function createSlots(){
+
+      // Create an array from 1-16
+      var numberArray = [];
+
+      if ( full_sixty == true ){ // only add a full 16 slots to the array if this is set to true in the component input
+        for (let i = 1; i <= 16; i++) {
+          numberArray.push(i);
+        };
+      };
+
+      // add slots required - increases availability of these slots and therefore chance of being filled
+      numberArray = [...numberArray, ...slots_required]
+
+      // remove slots not required
+      numberArray = numberArray.filter(num => !slots_not_required.includes(num));
+
+
+      // Shuffle array randomly - Fisher-Yates method
+      for (let i = numberArray.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [numberArray[i], numberArray[j]] = [numberArray[j], numberArray[i]];
+      }
+      return numberArray;
+    };
+
+
+    // If the slots array exists already then merge new and existing slots, otherwise just use new slots
+    function mergeSlots(){
+
+      // if slots_array already defined, then merge new array with existing
+      if (jatos.batchSession.defined("/slots_available")){
+
+        // get existing array
+        slots_existing = jatos.batchSession.find("/slots_available");
+
+        // merge with new array created in this script
+        slots_array = [...slots_existing, ...new_slots];
+
+      } else { // if slots array does not already exist in the batch session data
+        
+        // just use the new array
+        slots_array = [...new_slots];
+
+      }
+    };
+
+
+    // Reset slots
+    function updateSlots(){
+
+      // Replace existing entry with full array of slots
+      jatos.batchSession.set("slots_available" , slots_array )
+          .then(() => console.log("Batch Session was successfully updated"))
+          .catch(() => console.log("Batch Session synchronization failed"));
+
+    };
+
+
+    // Run jatos
+    jatos.onLoad(() => {
+      //jatos.batchSessionVersioning = false;
+      console.log('reset slots start');
+      retrieveThings();
+      new_slots = createSlots();
+      mergeSlots();
+      updateSlots();
+      jatos.endStudy();
+    });
+
+</script>
+</html>
