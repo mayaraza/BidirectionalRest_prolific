@@ -1,0 +1,439 @@
+<!-- <!DOCTYPE html> -->
+<html>
+  <head>
+    <title>Experiment</title>
+
+    <!--
+      Script:
+      Tone and flash detection task. Plays a sound clip and the fixation cross changes colour - pps respond with the space bar.
+      
+    -->
+
+
+    <script src="jatos.js"></script>
+    <script src="jspsych-7.3.0/jspsych.js"></script>
+<!-- load plugins here -->
+    <script src="stimuli.js"></script>
+    <script src="jspsych-7.3.0/plugin-html-keyboard-response.js"></script>
+    <script src="jspsych-7.3.0/plugin-html-button-response.js"></script>
+    <script src="jspsych-7.3.0/plugin-psychophysics-modified.js"></script>
+    <script src="jspsych-7.3.0/plugin-preload.js"></script>
+
+    <link href="jspsych-7.3.0/jspsych.css" rel="stylesheet" type="text/css" />
+  </head>
+
+  <style> 
+
+		.information-header {
+			position: fixed;
+			width: 100%;
+			top: 0;
+			left: 0;
+			background-color: grey;
+			color: White;
+			text-align: center;
+      padding-bottom: 10px;
+      margin-bottom: 50px;
+		}
+
+		.information-body {
+			width: 700px;
+			height: 450px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+			padding: 10px 50px; 
+			color: black;
+		}
+
+	</style>
+
+  <body></body>
+  <script>
+
+      // var jsPsych = initJsPsych({
+      //       on_finish: function() {
+      //       jsPsych.data.displayData();
+      //     }
+      //     });
+
+      // OR jatos
+      var jsPsych = initJsPsych({
+        //experiment_width: 700,
+        on_finish: function () {
+          jsPsych.data.addProperties({ subID: jatos.studySessionData.PP_ID });
+          jsPsych.data.addProperties({ taskName: "TFD" });
+          jsPsych.data.addProperties({ expGrp: exp_grp });
+          jatos.startComponentByPos(11, jsPsych.data.get().json()) // Component position for redirect script
+        }
+      });
+
+      var timeline = [];
+
+      // DEFINE GLOBAL VARIABLES
+      var PPID, ppVariables, task_num, exp_grp, event_times, problem, termination_message_stim, score, TFD_interaction;
+
+      // DEFINE FUNCTIONS
+      function retrieveThings(){
+        // PP BATCH SESSION DATA
+        ppVariables = jatos.batchSession.find("/" + PPID); // returns object containing pp's variables
+
+        //EXP_GRP
+        exp_grp = ppVariables['experimental_group'];
+
+        // TASK_NUM COMPONENT PROPS
+        task_num = ppVariables['task_tracker'];
+      };
+
+
+      // Function to briefly change background colour when resposne is detected
+      function keypress_detected(info){
+        var canvasElement = document.getElementById("myCanvas");
+
+        // Change the colour
+        canvasElement.style.backgroundColor = "#b4b4b4"; // change to dark grey
+
+        // Revert the color back to green after 200ms
+        setTimeout(function() {
+          canvasElement.style.backgroundColor = "#c8c8c8"; // go back to light grey
+        }, 300);
+      };
+
+
+
+
+
+      // PRELOAD SOUNDS
+
+      // put preload before instruction reminder so that if it takes a long time then pps will not miss the start of the task
+
+      // Get the sound files from the stimulus array in the stim js file
+      var sounds = TFD_stim_arr.map(function (stim) { return stim.sound_file });
+
+      var TFD_preload = {
+        type: jsPsychPreload,
+        audio: sounds,
+        message: '<div><p>The experiment is loading. This may take up to 30 seconds. Please do not refresh.</p></div>'
+      };
+      timeline.push(TFD_preload);
+
+
+
+
+
+      // REMINDER OF INSTRUCTIONS
+
+      var TFD_reminder = {
+        type: jsPsychHtmlKeyboardResponse,
+        stimulus: "<div class='information-header'><h1> Relaxation Task </h1></div>" + 
+          "<br><hr>" +
+          "<div class='information-body'><p>"+
+          'Relax.'+
+          '<br>'+
+          '<br>'+
+          'Press the space bar when you hear a piano note or see the cross change colour.'+
+          '<br>'+
+          '<br>'+
+          'This task will last 5 mins. Please do not multi-task.'+
+          '<br>'+
+          '<br>'+
+          'Press the space bar to begin.'+
+          "</p></div><hr>",
+        choices: [' '],
+      };
+      timeline.push(TFD_reminder);
+
+
+      // testing variables
+      var TFD_sound_file, trial_colour_times, trial_details;
+
+
+      // Set stimuli
+      var set_stim_TFD = {
+        type: jsPsychHtmlKeyboardResponse,
+        stimulus: ' ',
+        choices: 'NO_KEYS',
+        trial_duration: 1,
+        on_finish: function(){
+          
+          // Retrieve colour event times and sound file depending on task number - ensures pps don't hear same file twice
+          if ( task_num == 1){
+
+            TFD_sound_file = sounds[0];
+            trial_details = TFD_stim_arr[0]; // finds relevant object from main stim array
+            trial_colour_times = trial_details.colour_times; // gets array of colour event times
+
+          } else {
+
+            TFD_sound_file = sounds[1];
+            trial_details = TFD_stim_arr[1];
+            trial_colour_times = trial_details.colour_times;
+
+          }
+        }
+      };
+      timeline.push(set_stim_TFD);
+
+
+
+      // DEFINE TRIAL
+      
+      var TFD_trial = {
+        type: jsPsychPsychophysics,
+        stimuli: [
+          {
+            // focus warning
+            obj_type: 'text',
+            content: "Please do not leave this screen or multi-task.",
+            text_color: 'black',
+            startX: 450,
+            startY: 100,
+            show_start_time: 0
+          },
+          {
+            // sound file
+            obj_type: 'sound',
+            file: function(){ return TFD_sound_file },
+            show_start_time: 0
+          },
+          {
+            // black cross
+            obj_type: 'cross',
+            origin_center: true,
+            line_length: 150,
+            line_width: 10,
+            line_color: 'black',
+            show_start_time: 0 // first one always zero
+          },
+          {
+            // red cross
+            obj_type: 'cross',
+            origin_center: true,
+            line_length: 150,
+            line_width: 10,
+            line_color: 'red',
+            show_start_time: function(){ return trial_colour_times[0] },
+          },
+          {
+            // black cross
+            obj_type: 'cross',
+            origin_center: true,
+            line_length: 150,
+            line_width: 10,
+            line_color: 'black',
+            show_start_time: function(){ return trial_colour_times[1] },
+          },
+          {
+            // red cross
+            obj_type: 'cross',
+            origin_center: true,
+            line_length: 150,
+            line_width: 10,
+            line_color: 'red',
+            show_start_time: function(){ return trial_colour_times[2] },
+          },
+          {
+            // black cross
+            obj_type: 'cross',
+            origin_center: true,
+            line_length: 150,
+            line_width: 10,
+            line_color: 'black',
+            show_start_time: function(){ return trial_colour_times[3] },
+          },
+          {
+            // red cross
+            obj_type: 'cross',
+            origin_center: true,
+            line_length: 150,
+            line_width: 10,
+            line_color: 'red',
+            show_start_time: function(){ return trial_colour_times[4] },
+          },
+          {
+            // black cross
+            obj_type: 'cross',
+            origin_center: true,
+            line_length: 150,
+            line_width: 10,
+            line_color: 'black',
+            show_start_time: function(){ return trial_colour_times[5] },
+          },
+        ],
+        canvas_width: 900, // Tried to have this very wide so that whole screen is grey but it prevents the cross form being shown :((
+        background_color: '#c8c8c8',
+        response_type: 'key',
+        choices: [' '],
+        trial_duration: 300000, // 5 minutes
+        response_ends_trial: false,
+        on_start : function(){ // set listener to detect key presses
+          jsPsych.pluginAPI.getKeyboardResponse({
+              callback_function: keypress_detected,
+              valid_responses : [" "],
+              rt_method: "performance",
+              persist: true
+          });
+        },
+        on_finish: function(){
+
+          jsPsych.pluginAPI.cancelAllKeyboardResponses();
+
+          // Retrieve and tidy event times
+          var piano = trial_details['piano_times'];
+          var colour = trial_details['colour_times'];
+          event_times = [...piano, ...colour];
+          event_times = event_times.filter(number => number <= 300000); // remove any that are over 5mins
+          event_times.sort((a, b) => a - b); // sort into ascending order
+          console.log(event_times);
+
+
+          jsPsych.data.addProperties({ eventTimes: event_times });
+
+
+          // Get the interaction data for during the TFD trial, add it to the results
+          var TFD_interaction_all = jsPsych.data.getInteractionData();
+          TFD_interaction = TFD_interaction_all.trials;
+          TFD_interaction = TFD_interaction.filter(obj => { return obj.event === 'blur' && obj.trial == 2 });
+          jsPsych.data.addProperties({ blurData: TFD_interaction });
+
+        }
+      };
+      timeline.push(TFD_trial);
+
+      
+
+
+
+
+      // get data from last trial
+      var data_calc = {
+        type: jsPsychHtmlKeyboardResponse,
+        stimulus: ' ',
+        choices: "NO_KEYS",
+        trial_duration: 1,
+        on_start: function(){
+
+          // RETRIEVE PP RESPONSES
+          var TFD_data = jsPsych.data.getLastTrialData();
+          var TFD_trial_data = TFD_data["trials"];
+          TFD_trial_data = TFD_trial_data[0];
+          var response_times = TFD_trial_data["rt"]; // this retrieves an array containing the timepoints of all the responses
+          console.log(response_times);
+
+          // CALCULATE PERFORMANCE
+          // Initialize variables to keep track of points and matched responses
+          score = 0;
+          const matchedResponses = [];
+
+          // Loop through event times - event times has been set at the end of the TFD trial
+          // In this loop, for each eventTime only one search for a correct response time is conducted, then the loop moves on to the next eventTime
+          // This means pps cannot benefit by clicking multiple times for a single event
+          for (const eventTime of event_times) {
+            // Checks the response time is between 150-3000ms AFTER the event time
+            const matchedResponse = response_times.find((responseTime) => responseTime > eventTime && responseTime - eventTime >= 150 && responseTime - eventTime <= 3000);
+
+            if (matchedResponse) {
+              // If a matched response is found, add a point and mark the response as used
+              score++;
+              matchedResponses.push(matchedResponse);
+            }
+          };
+          console.log(score);
+
+          // CALCULATE NUMBER OF INCORRECT RESPONSES (responses not within 150-1000ms following any event)
+          const missedResponses = response_times.filter((responseTime) => !matchedResponses.includes(responseTime));
+
+          jsPsych.data.addProperties({ TFDscore: score });
+
+
+          // TERMINATION
+          if ( response_times.length < 1){ // NO RESPONSES MADE
+            // terminate
+            console.log('terminate no resp');
+            problem = true;
+            termination_message_stim = '<div><h1>Your involvement has been terminated.</h1>'+
+              '<p style="width:700px">You did not make any responses to this task. This page should redirect you to Prolific when you click "Exit". Copy the completion code "CHVB4HI7".</p><br>'+
+              '</div>'
+          } else if (score < event_times.length * 0.7){ // PREFORMANCE LESS THAN 70%
+            // terminate
+            console.log('terminate performane < 70');
+            problem = true;
+            termination_message_stim = '<div><h1>Your involvement has been terminated.</h1>'+
+              '<p style="width:700px">Our research depends upon participants being engaged and concentrating. Your performance on this task suggests you were not engaged and concentrating. This page should redirect you to Prolific when you click "Exit". Copy the completion code "CHVB4HI7".</p><br>'+
+              '</div>'
+          } else if ( missedResponses.length > event_times.length * 1.7 ){ // MADE 70% MORE RESPONSES THAN REQUIRED e.g. pressing space bar throughout whole task
+            // terminate
+            console.log('terminate too many resp');
+            problem = true;
+            termination_message_stim = '<div><h1>Your involvement has been terminated.</h1>'+
+              '<p style="width:700px">Our research depends upon participants being engaged and concentrating. Your pattern of responses on this task suggests you were not engaged and concentrating. This page should redirect you to Prolific when you click "Exit". Copy the completion code "CHVB4HI7".</p><br>'+
+              '</div>';
+          }  else {
+            problem = false;
+            console.log('pass');
+          };
+
+
+
+          if ( problem === true ){
+            // Update batch session data
+            ppVariables['terminated'] = true;
+            
+            jatos.batchSession.set(PPID, ppVariables)
+              .then(() => console.log("Batch Session was successfully updated"))
+              .catch(() => console.log("Batch Session synchronization failed"));
+
+          }
+
+        }
+      };
+      timeline.push(data_calc);
+
+
+      // Termination message
+      var TFD_termination_message_trial = {
+        type: jsPsychHtmlButtonResponse,
+        stimulus: function(){ return termination_message_stim },
+        choices: ["Exit"],
+        on_finish: function(){
+          jatos.submitResultData(jsPsych.data.get().json());
+          jatos.endStudyAndRedirect("https://app.prolific.com/submissions/complete?cc=CHVB4HI7"); // Should redirect and save pp to failed attention check group
+        }
+      };
+
+      // conditional timeline for termination message
+      var if_node_terminate_TFD = {
+        timeline: [TFD_termination_message_trial],
+        conditional_function: function(){
+          if ( problem == true ){
+            return true
+          } else { return false }
+        }
+      };
+      timeline.push(if_node_terminate_TFD);
+
+
+
+
+      // Sound clip seems to not end immediately so this trial should help to reduce the liklihood that the sound will not run into the next task
+      var blank_ITI = {
+        type: jsPsychHtmlKeyboardResponse,
+        stimulus: " ",
+        choices: "NO_KEYS",
+        trial_duration: 1000
+      };
+      timeline.push(blank_ITI);
+
+
+
+      // OR jatos
+      jatos.onLoad(() => {
+        jatos.batchSessionVersioning = false;
+        console.log('relax start');
+        PPID = jatos.studySessionData.PP_ID;
+        retrieveThings();
+        jsPsych.run(timeline);
+      });
+
+</script>
+</html>
