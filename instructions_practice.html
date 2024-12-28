@@ -1,0 +1,416 @@
+<!-- <!DOCTYPE html> -->
+<html>
+  <head>
+    <title>Experiment</title>
+
+    <!-- This script gives pps detailed instructions at the start of the experiment and gives practice trials for the TFD and ecnoding tasks.
+    There is also a comprehension check to make sure they understand. They get two attempts at this test.
+    If they get everything right, they can progress. If they get any answers incorrect on their 2nd attempt, the experiment will end. -->
+    
+
+    <script src="jatos.js"></script>
+
+    <script>
+      var task_name = 'Pleasantness Task';
+    </script>
+
+    <script src="jspsych-7.3.0/jspsych.js"></script>
+<!-- load plugins here -->
+    <script src="jspsych-7.3.0/plugin-survey-multi-choice.js"></script>
+    <script src="jspsych-7.3.0/plugin-html-keyboard-response-modified.js"></script>
+    <script src="jspsych-7.3.0/plugin-html-button-response.js"></script>
+    <script src="jspsych-7.3.0/plugin-instructions.js"></script>
+    <script src="jspsych-7.3.0/plugin-preload.js"></script>
+    <script src="jspsych-7.3.0/plugin-psychophysics-modified.js"></script>
+    <link href="jspsych-7.3.0/jspsych.css" rel="stylesheet" type="text/css" />
+    <link rel="stylesheet" href="banner.css">
+  </head>
+
+  <style> 
+
+		.information-header {
+			position: fixed;
+			width: 100%;
+			top: 0;
+			left: 0;
+			background-color: grey;
+			color: White;
+			text-align: center;
+      padding-bottom: 10px;
+      margin-bottom: 50px;
+		}
+
+		.information-body {
+			width: 700px;
+			height: 450px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+			padding: 10px 50px; 
+			color: black;
+		}
+
+	</style>
+
+  <body></body>
+  <script>
+
+
+      // OR jatos
+      var jsPsych = initJsPsych({
+          		on_finish: function () {
+          			jsPsych.data.addProperties({ subID: jatos.studySessionData.PP_ID });
+                jsPsych.data.addProperties({ taskName: "instruct_prac" });
+          			jatos.startNextComponent(jsPsych.data.get().json())
+          		}
+          	});
+
+      var timeline = [];
+      var PPID;
+
+      // Function to change the background colour upon response in the encoding task
+      function change_background(e) {
+          if(e.keyCode == 70 || e.keyCode == 74) { // numbers refer to the F or J keys
+            document.body.style.backgroundColor = '#BFBFBF' // change color as needed
+
+            // Code below times the colour change out
+              // setTimeout(function () {
+              //   document.body.style.backgroundColor = '#FFFFFF'
+              // }, 500) // change duration as needed
+          }
+      };
+
+
+      // Function to briefly change background colour when response is detected during the relaxation task
+      function keypress_detected(info){
+        var canvasElement = document.getElementById("myCanvas");
+
+        // Change the colour
+        canvasElement.style.backgroundColor = "#b4b4b4"; // change to dark grey
+
+        // Revert the color back to green after 200ms
+        setTimeout(function() {
+          canvasElement.style.backgroundColor = "#c8c8c8"; // go back to light grey
+        }, 300);
+      };
+
+
+
+      var general_TFD_instruct = {
+        type: jsPsychInstructions,
+        pages: [
+          // Intro
+          "<div class='information-header'><h1> Instructions </h1></div>" + 
+          "<br><hr>" +
+          "<div class='information-body'>" +
+          "<p>Let's go through the task instructions." +
+          "<br><br>"+
+          "We'll show you short reminders ahead of each task."+
+          "<br><br>"+
+          "After reading the instructions, you will answer some quick questions to check you understand. You will get two attempts at this test.</p>" +
+          "</div><hr>",
+
+          // Video instruct
+          "<div class='information-header'><h1> Video task </h1></div>" + 
+          "<br><hr>" +
+          "<div class='information-body'>" +
+          "<p>The first task will require you to watch a short video." +
+          "<br><br>"+
+          "We are interested in the effects of this video on how you feel, and how this in turn affects your responses on later tasks."+
+          "<br><br>"+
+          "After watching the video, you will answer some quick questions about your mood.</p>" +
+          "</div><hr>",
+
+          // General
+          "<div class='information-header'><h1> Instructions </h1></div>" + 
+          "<br><hr>" +
+          "<div class='information-body'>" +
+          "<p>You will now read instructions for 3 subsequent tasks. The order in which you will complete these tasks depends on the condition you have been assigned to." +
+          "<br><br>"+
+          "</div><hr>",
+          
+          // Relaxation detailed - pg1
+          "<div class='information-header'><h1> Relaxation Task </h1></div>" + 
+          "<br><hr>" +
+          "<div class='information-body'><p>" +
+          "The <b>Relaxation task</b> is an opportunity for you to relax."+
+          "<br><br>"+
+          "There will be some background noise (sounds like a waterfall). Listen and gently gaze at the screen." +
+          "<br><br>"+
+          "Occasionally, you will hear a <b>piano note</b> alongside the sound of the waterfall or see the cross displayed on-screen <b>change colour.</b>"+
+          "<br><br>"+
+          "You should <b>press the space bar</b> as soon as you hear the piano note or see the cross change colour (i.e. from black to red AND from red to black). "+
+          "The screen will flash grey when a response is recorded." +
+          "</p></div><hr>",
+
+          // Relaxation detailed - pg2
+          "<div class='information-header'><h1> Relaxation Task </h1></div>" + 
+          "<br><hr>" +
+          "<div class='information-body'><p>" +
+          "This task is designed to be easy and relaxing."+
+          "<br><br>"+
+          "It is <b>very important</b> that you focus on this task and are not distracted. <b>Please do not try to complete other activities outside of the experiment</b>." +
+          "<br><br>"+
+          "Take this as an opportunity to rest your mind. There is no need to think about other parts of the experiment." +
+          "</p></div><hr>",
+
+          // Relaxation reminder
+          "<div class='information-header'><h1> Relaxation Task </h1></div>" + 
+          "<br><hr>" +
+          "<div class='information-body'><p>" +
+          "<i>You will see the header above and the following reminder before this task:</i>"+
+          "<br><br>"+
+          "Relax." +
+          "<br><br>"+
+          "Press the space bar when you hear a piano note or see the cross change colour." +
+          "<br><br>"+
+          "This task will last 5 mins. Please do not multi-task." +
+          "</p></div><hr>",
+
+
+          // Ready to practice?
+          "<div class='information-header'><h1> Relaxation Task </h1></div>" + 
+          "<br><hr>" +
+          "<div class='information-body'><p>" +
+          "Ready to practice?"+
+          "</p></div><hr>",
+
+        ],
+        show_clickable_nav: true,
+        allow_backward: true
+      };
+      timeline.push(general_TFD_instruct);
+
+
+
+      // Relaxation task practice trial
+      var prac_sound_file = ['./stimuli/relaxation_stim/brown_piano_5.mp3'];
+
+      // Preload sound files
+      var TFD_preload = {
+        type: jsPsychPreload,
+        audio: prac_sound_file,
+        message: '<div><p>The experiment is loading. This may take up to 30 seconds. Please do not refresh.</p></div>'
+      };
+      timeline.push(TFD_preload);
+
+      // Relaxation task practice trial
+      var TFD_prac = {
+        type: jsPsychPsychophysics,
+        stimuli: [
+          {
+            // focus warning
+            obj_type: 'text',
+            content: "Please do not leave this screen or multi-task.",
+            text_color: 'black',
+            startX: 450,
+            startY: 100,
+            show_start_time: 0
+          },
+          {
+            // sound file
+            obj_type: 'sound',
+            file: prac_sound_file[0],
+            show_start_time: 0
+          },
+          {
+            // black cross
+            obj_type: 'cross',
+            origin_center: true,
+            line_length: 150,
+            line_width: 10,
+            line_color: 'black',
+            show_start_time: 0 // first one always zero - from beginning
+          },
+          {
+            // red cross
+            obj_type: 'cross',
+            origin_center: true,
+            line_length: 150,
+            line_width: 10,
+            line_color: 'red',
+            show_start_time: 3000,
+          },
+          {
+            // red cross
+            obj_type: 'cross',
+            origin_center: true,
+            line_length: 150,
+            line_width: 10,
+            line_color: 'black',
+            show_start_time: 18000,
+          }
+        ],
+        canvas_width: 900,
+        background_color: '#c8c8c8',
+        response_type: 'key',
+        choices: [' '],
+        trial_duration: 20000, // 20s
+        response_ends_trial: false,
+        on_start : function(){ // set listener to detect key presses
+          jsPsych.pluginAPI.getKeyboardResponse({
+              callback_function: keypress_detected,
+              valid_responses : [" "],
+              rt_method: "performance",
+              persist: true
+          });
+        },
+        on_finish: function(){ jsPsych.pluginAPI.cancelKeyboardResponse();}
+      };
+      timeline.push(TFD_prac);
+
+
+      // Spot the difference task instruction pages
+      var spotdiff_instruct = {
+        type: jsPsychInstructions,
+        pages: [
+          // Instructions
+          "<div class='information-header'><h1> Instructions </h1></div>" + 
+          "<br><hr>" +
+          "<div class='information-body'><p>" +
+          "Great, onto the next task!"+
+          "</p></div><hr>",
+
+          // Spotdiff detailed - pg1
+          "<div class='information-header'><h1> Spot-the-difference Task </h1></div>" + 
+          "<br><hr>" +
+          "<div class='information-body'><p>" +
+          "This task involves a game of spot-the-difference. Your task is to study pairs of images to find differences between them."+
+          "<br><br>"+
+          "There will be 7-9 differences between each image pair. Some of them may be hard to notice - study them as hard as you can." +
+          "</p></div><hr>",
+
+          /// MORE instructions here...
+
+        ],
+        show_clickable_nav: true,
+        allow_backward: true
+      };
+      timeline.push(spotdiff_instruct);
+
+
+      // INSERT SPOTDIFF PRACTICE
+
+
+
+
+      // Encoding task instruction pages
+      var encoding_instruct = {
+        type: jsPsychInstructions,
+        pages: [
+          // Instructions
+          "<div class='information-header'><h1> Instructions </h1></div>" + 
+          "<br><hr>" +
+          "<div class='information-body'><p>" +
+          "Let's continue..."+
+          "</p></div><hr>",
+
+          // Pleasantness detailed - pg1
+          "<div class='information-header'><h1> Pleasantness Task </h1></div>" + 
+          "<br><hr>" +
+          "<div class='information-body'><p>" +
+          "During the Pleasantness Task, you will see some words shown one at a time."+
+          "<br><br>"+
+          "You must decide whether you find each word to be pleasant or unpleasant. There are no right or wrong answers, we are just interested in your decision." +
+          "</p></div><hr>",
+
+          // Pleasantness detailed - pg2
+          "<div class='information-header'><h1> Pleasantness Task </h1></div>" + 
+          "<br><hr>" +
+          "<div class='information-body'><p>" +
+          'Answer using the "F" or "J" keys on the keyboard. (You will see a reminder of the keys before the task begins.)'+
+          "<br><br>"+
+          "<big><b>F = PLEASANT&emsp;/&emsp;J = UNPLEASANT</b></big>"+
+          "<br><br>"+
+          "Each word will remain on screen for 3 seconds. Respond as soon as you have made your judgement. The screen should turn grey when your response has been recorded." +
+          "</p></div><hr>",
+         
+          // Pleasnantess reminder
+          "<div class='information-header'><h1> Pleasantness Task </h1></div>" + 
+          "<br><hr>" +
+          "<div class='information-body'><p>" +
+          "<i>You will see the header above and the following reminder before this task:</i>"+
+          "<br><br>"+
+          "<big><b>F = PLEASANT&emsp;/&emsp;J = UNPLEASANT</b></big>"+
+          "<br><br>"+
+          "Does the word feel pleasant or unpleasant?"+
+          "<br><br>"+
+          "Hover your forefingers over the F and J keys." +
+          "</p></div><hr>",
+        ],
+        show_clickable_nav: true,
+        allow_backward: true
+      };
+      timeline.push(encoding_instruct);
+
+      // Ready to practice?
+      var hover_trial = {
+        type: jsPsychHtmlKeyboardResponse,
+        stimulus: "<div class='information-header'><h1> Pleasantness Task </h1></div>" + 
+          "<br><hr>" +
+          "<div class='information-body'><p>" +
+          "Ready to practice?"+
+          '<br><br>'+
+          'Press the F or J key to begin.'+
+          "</p></div><hr>",
+          choices: ['f','j']
+      }
+      timeline.push(hover_trial);
+
+      var practice_words = [
+        { stim: "JUMP"},
+        { stim: "RUN"},
+        { stim: "BUILD"},
+        { stim: "SCARE"},
+        { stim: "THINK"},
+      ];
+      
+      // Cycle through word list
+      var encoding_prac = {
+          timeline: [
+            {
+            // fixation cross for 300ms ITI
+                type: jsPsychHtmlKeyboardResponse,
+                stimulus: function(){
+                  return "<div class='banner' id='standard' ><h1>" + task_name + "</h1></div>" +  // banner
+                  "<div class='stim'><p>+</p>" + // fixation
+                  //"<br><br><br><br><p>F = PLEASANT&emsp;&emsp;&emsp;J = UNPLEASANT</p>"+ // key reminder
+                  "</div>"
+                },
+                choices: "NO_KEYS",
+                trial_duration: 300
+            },
+            {
+            // display word for 3000ms
+                type: jsPsychHtmlKeyboardResponse,
+                stimulus: function(){
+                  return "<div class='banner' id='standard' ><h1>" + task_name + "</h1></div>" +  // banner
+                  "<div class='stim';><p>" + jsPsych.timelineVariable('stim') + "</p>" + // word
+                  "</div>"
+                },
+                choices: ['f', 'j'],
+                trial_duration: 3000,
+                response_ends_trial: false,
+                on_start: function(){ document.addEventListener("keydown", change_background) },
+                on_finish: function(){ 
+                  document.body.style.backgroundColor = '#FFFFFF'
+                  document.removeEventListener("keydown", change_background) },
+            }
+          ],
+          timeline_variables: practice_words,
+          randomize: true
+      };
+      timeline.push(encoding_prac);
+
+
+      //jsPsych.run(timeline);
+
+// OR jatos
+      jatos.onLoad(() => {
+        console.log('instructions practice start');
+        PPID = jatos.studySessionData.PP_ID;
+        jsPsych.run(timeline);
+      });
+
+</script>
+</html>

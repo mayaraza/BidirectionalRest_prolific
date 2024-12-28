@@ -245,17 +245,21 @@
               '<p style="width:700px">Our research depends upon participants being engaged and concentrating. Your involvement in the study has been terminated because the speed of your responses exceeds the threshold for reading each word, deciding upon and making a response. This page should redirect you to Prolific when you click "Exit". Copy the completion code "CHVB4HI7".</p><br>'+
               '</div>';
             console.log('pp responded too quickly to more than 70% of trials');
-          }
+          };
 
           if ( problem === true ){
-            // Update batch session data
+            // Set termination to true if there is a problem
             ppVariables['terminated'] = true;
-            
-            jatos.batchSession.set(PPID, ppVariables)
+
+          };
+
+          // Set repeatable to false for all pps - pps should not repeated the experiment if they have seen the words
+          ppVariables['repeatable'] = false;
+
+          // Update batch session object
+          jatos.batchSession.set(PPID, ppVariables)
               .then(() => console.log("Batch Session was successfully updated"))
               .catch(() => console.log("Batch Session synchronization failed"));
-
-          }
 
         }
       };

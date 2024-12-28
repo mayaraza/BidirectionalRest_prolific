@@ -50,19 +50,22 @@
       // timeline.push(pause);
 
       // DEFINE GLOBAL VARIABLES
-      var PPID, ppVariables, pref_exp_grp, pref_CB, pp_CB, pp_expgrp, slots_array, pp_slot, slot_assigned;
+      var PPID, ppVariables, pref_exp_grp, pref_CB, pp_CB, pp_expgrp, slots_array, pp_slot, slot_assigned, recruit_run;
 
 
       function retrieveThings(){
 
-        //other variables
+        // Perefential slot
         pref_slot = jatos.componentJsonInput.preference_slot;
 
         // get the pp's batch session data
         ppVariables = jatos.batchSession.find("/" + PPID); // returns object containing pp's variables
 
-        // finds the slot currently assigned
+        // finds the slot currently assigned (may be null)
         pp_slot = ppVariables['slot'];
+
+        // Find recruitment run
+        recruit_run = jatos.studyJsonInput.recruitmentRun;
 
       };
 
@@ -87,8 +90,8 @@
             // get the first slot and remove it from the array
             slot_assigned = slots_array.splice(0, 1)[0];
 
-            console.log(slots_array);
-            console.log(pp_slot);
+            //console.log(slots_array);
+            //console.log(pp_slot);
 
           }
 
@@ -105,6 +108,14 @@
           // Work out the exp_grp from the slot
           pp_expgrp = Math.floor((slot_assigned - 1) / 4) + 1;
           ppVariables['experimental_group'] = pp_expgrp;
+
+
+          // Set start time
+          var current_time = Date.now();
+          ppVariables['start_time'] = current_time;
+
+          // Set recruitment run
+          ppVariables['recruitment_run'] = recruit_run;
 
         }
       };
@@ -126,6 +137,7 @@
         getSlots();
         assignSlot();
         returnSlots();
+        jatos.studySessionData.taskTracker = 1; // save task tracker in study session data
         //jsPsych.run(timeline);
         jatos.startNextComponent();
       });

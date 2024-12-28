@@ -56,7 +56,6 @@
           		on_finish: function () {
           			jsPsych.data.addProperties({ subID: jatos.studySessionData.PP_ID });
                 jsPsych.data.addProperties({ taskName: "final_instruct" });
-                updateStartTime();
           			jatos.startNextComponent(jsPsych.data.get().json())
           		}
           	});
@@ -64,21 +63,6 @@
       var timeline = [];
       var PPID;
 
-/*       // Function to save the session start time in the batch session data
-      function updateStartTime(){
-
-        // FETCH CURRENT TIME
-        var current_time = Date.now();
-
-        // LOG DAY1 START TIME
-          ppVariables['day1_start_time'] = current_time;
-
-        // UPDATE BATCH SESSION DATA
-        jatos.batchSession.set(PPID, ppVariables)
-          .then(() => console.log("Batch Session was successfully updated"))
-          .catch(() => console.log("Batch Session synchronization failed"));
-      };
- */
 
       var overall_instruct = {
         type: jsPsychInstructions,
@@ -94,7 +78,7 @@
           "<div class='information-header'><h1> Instructions </h1></div>" + 
           "<br><hr>" +
           "<div class='information-body'><p>" +
-          'As mentioned, our research depends upon you being fully engaged and concentrating. Especially during simple or relaxing tasks.'+
+          'As mentioned, our research depends upon you being fully engaged and concentrating throughout.'+
           '<br>'+
           '<br>'+
           '<b>Please concentrate on the task at hand, please do not multi-task or get distracted. Try as hard as you can but please do not cheat.</b>'+
@@ -107,7 +91,7 @@
           "<div class='information-body'><p>" +
           'Throughout the study, your responses to the tasks will be monitored to ensure you are paying attention. For example, if you do not respond during a task or if you respond randomly/continously then you may be flagged as inattentive, and your involvement may be terminated.'+
           '<br><br>'+
-          'You should not be flagged for genuine errors. The checks are simple and you will pass them if you remain focused on the tasks.'+
+          'You should not be flagged for genuine errors. The checks are simple and you will pass them if you follow the instructions and remain focused on the tasks.'+
           "</p></div><hr>",
 
           // Final page4
