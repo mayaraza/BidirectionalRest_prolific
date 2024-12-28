@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Experiment</title>
+
+<!-- This script asks pps if they have participated seriously in the experiment.-->
+    
+
+    <script src="jatos.js"></script>
+    <script src="jspsych-7.3.0/jspsych.js"></script>
+    <script src="jspsych-7.3.0/plugin-survey-multi-choice.js"></script>
+    <script src="jspsych-7.3.0/plugin-survey-text.js"></script>
+    <script src="jspsych-7.3.0/plugin-html-button-response.js"></script>
+    <link href="jspsych-7.3.0/jspsych.css" rel="stylesheet" type="text/css" />
+  </head>
+  <body></body>
+  <script>
+
+    /* initialize jsPsych */
+    // var jsPsych = initJsPsych({
+    //   experiment_width: 700,
+    //   on_finish: function() {
+    //   jsPsych.data.displayData();
+    // }
+    // });
+
+    // OR jatos
+      var jsPsych = initJsPsych({
+        experiment_width: 700,
+        on_finish: function () {
+          jsPsych.data.addProperties({ subID: jatos.studySessionData.PP_ID });
+          jsPsych.data.addProperties({ taskName: "seriousness" });
+          jatos.startNextComponent(jsPsych.data.get().json())
+        }
+      }); 
+
+    /* create timeline */
+    var timeline = [];
+
+    var PPID;
+
+
+    var seriousness_check1 = {
+      type: jsPsychSurveyMultiChoice,
+      preamble: '<div><p>'+
+      'Our research depends upon having <b>good quality data</b>. Are there any reasons that your data should not be used in our research? Please answer honestly; this will <b>not</b> affect your payment.'+
+      '</p></div>',
+      questions: [
+        {
+          prompt: "<div><h4>Did you participate seriously?</h4></div>", 
+          name: 'serious_not', 
+          options: ["I have participated seriously.", "I did not participate seriously."],  
+          required: true
+        }
+      ],
+    };
+    timeline.push(seriousness_check1);
+
+
+    var seriousness_check2 = {
+      type: jsPsychSurveyText,
+      preamble: '<div><p>'+
+      'Our research depends upon having <b>good quality data</b>. Are there any reasons that your data should not be used in our research? Please answer honestly; this will <b>not</b> affect your payment.'+
+      '</p></div>',
+      questions: [
+        {prompt: "<div align='left'><h4>Please explain any reasons why we might need to throw your data away.</h4></div>",
+        placeholder: 'Leave blank if not applicable',
+        name: 'seriousness_reasons',
+        rows: 10,
+        columns: 60
+      }
+      ]
+    };
+    timeline.push(seriousness_check2);
+
+
+
+    /* start the experiment */
+    //jsPsych.run(timeline);
+
+    // OR jatos
+    jatos.onLoad(() => {
+      console.log('seriousness start');
+      PPID = jatos.studySessionData.PP_ID;
+      jsPsych.run(timeline);
+    });
+
+
+  </script>
+</html>

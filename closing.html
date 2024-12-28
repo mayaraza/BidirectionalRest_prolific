@@ -1,0 +1,105 @@
+<!-- <!DOCTYPE html> -->
+<html>
+  <head>
+    <title>Experiment</title>
+
+    <!--
+      Script:
+      
+    -->
+
+
+    <script src="jatos.js"></script>
+    <script src="jspsych-7.3.0/jspsych.js"></script>
+<!-- load plugins here -->
+
+    <script src="jspsych-7.3.0/plugin-html-keyboard-response.js"></script>
+    <script src="jspsych-7.3.0/plugin-html-button-response.js"></script>
+
+    <link href="jspsych-7.3.0/jspsych.css" rel="stylesheet" type="text/css" />
+  </head>
+
+  <style> 
+
+		.information-header {
+			position: fixed;
+			width: 100%;
+			top: 0;
+			left: 0;
+			background-color: grey;
+			color: White;
+			text-align: center;
+      padding-bottom: 10px;
+      margin-bottom: 50px;
+		}
+
+		.information-body {
+			width: 700px;
+			height: 450px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+			/* padding: 10px 50px;  */
+			color: black;
+		}
+
+	</style>
+
+  <body></body>
+  <script>
+
+      // var jsPsych = initJsPsych({
+      //       on_finish: function() {
+      //       jsPsych.data.displayData();
+      //     }
+      //     });
+
+      // OR jatos
+      var jsPsych = initJsPsych({
+        experiment_width: 700,
+        on_finish: function () {
+          jsPsych.data.addProperties({ subID: jatos.studySessionData.PP_ID });
+          jatos.submitResultData(jsPsych.data.get().json()) // hope this works
+          jatos.endStudyAndRedirect(prolificRedirectLink);
+        }
+      });
+
+      var timeline = [];
+
+      // DEFINE GLOBAL VARIABLES
+      var PPID;
+      
+      // Set prolific redirect link for relevant batch
+      var prolificRedirectLink = "";
+      var prolificCompletionCode = "";
+
+      // Dis play closing message
+      var closing_message = {
+        type: jsPsychHtmlButtonResponse,
+        stimulus: function(){ return "<div class='information-header'><h1> End of Part 1 </h1></div>" + 
+        "<br><hr>" +
+        "<div class='information-body'><p align='center'>" +
+        "<b>You've completed the tasks for the first part of this session.</b>"+
+        "<br><br>"+
+        "Thank you very much for your time and effort so far! You will now be redirected to the second part of the session. Part 2 involves a different sent of tasks for an unrelated experiment."+
+        "<br><br>"+
+        "Copy the prolific completion code: " + prolificCompletionCode + " just in case."+
+        "<br>"+
+        "</p></div><hr>"},
+        choices: ['Finish']
+      };
+      timeline.push(closing_message);
+
+
+
+      //jsPsych.run(timeline);
+
+      // OR jatos
+      jatos.onLoad(() => {
+        console.log('closing start');
+        PPID = jatos.studySessionData.PP_ID;
+        jsPsych.run(timeline);
+      });
+
+</script>
+</html>
