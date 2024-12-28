@@ -1,0 +1,161 @@
+<!-- <!DOCTYPE html> -->
+<html>
+  <head>
+    <title>Experiment</title>
+
+    <!-- 
+      This script asks pps to report any technical issues they encountered during today's session.
+  -->
+    
+    <script src="jatos.js"></script>
+    <script src="jspsych-7.3.0/jspsych.js"></script>
+<!-- load plugins here -->
+
+    <script src="jspsych-7.3.0/plugin-survey-text.js"></script>
+    <script src="jspsych-7.3.0/plugin-html-button-response.js"></script>
+    <link href="jspsych-7.3.0/jspsych.css" rel="stylesheet" type="text/css" />
+  </head>
+
+  <style> 
+
+		.information-header {
+			position: fixed;
+			width: 100%;
+			top: 0;
+			left: 0;
+			background-color: grey;
+			color: White;
+			text-align: center;
+      padding-bottom: 10px;
+      margin-bottom: 50px;
+		}
+
+		.information-body {
+			width: 700px;
+			height: 450px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+			/* padding: 10px 50px;  */
+			color: black;
+		}
+
+	</style>
+
+  <body></body>
+  <script>
+
+      // var jsPsych = initJsPsych({
+      //   experiment_width: 700,
+      //   on_finish: function() {
+      //   jsPsych.data.displayData();
+      // }
+      // });
+
+
+      // OR jatos
+      var jsPsych = initJsPsych({
+        experiment_width: 700,
+        on_finish: function () {
+          jsPsych.data.addProperties({ subID: jatos.studySessionData.PP_ID });
+          jsPsych.data.addProperties({ experimental_group: exp_grp });
+          jsPsych.data.addProperties({ taskName: "report_issues" });
+          jatos.startNextComponent(jsPsych.data.get().json())
+        }
+      });
+
+      var timeline = [];
+
+      // DEFINE GLOBAL VARIABLES
+      var PPID, ppVariables, exp_grp;
+
+
+      // DEFINE FUNCTIONS
+      function retrieveThings(){
+        // PP BATCH SESSION DATA
+        ppVariables = jatos.batchSession.find("/" + PPID); // returns object containing pp's variables
+
+        //EXP_GRP
+        exp_grp = ppVariables['experimental_group'];
+
+      };
+
+      // Set the tasks according to pps expGrp
+      var set_report_stim = {
+        type: jsPsychHtmlButtonResponse,
+        stimulus: " ",
+        choices: "NO_KEYS",
+        trial_duration: 1,
+        on_finish: function(){
+
+          if (expGrp == 1){           // RR
+            task_flow_img = instruct_imges[0];
+            pre_task = "1st Relaxation";
+            post_task = "2nd Relaxation";
+
+          } else if (expGrp == 2){    // RE
+            task_flow_img = instruct_imges[1];
+            pre_task = "Relaxation";
+            post_task = "Spot the difference";
+
+          } else if (expGrp == 3){    // ER
+            task_flow_img = instruct_imges[2];
+            pre_task = "Spot the difference";
+            post_task = "Relaxation";
+
+          } else if (expGrp == 4){    // EE
+            task_flow_img = instruct_imges[3];
+            pre_task = "1st Spot the difference";
+            post_task = "2nd Spot the difference";
+
+          }
+        }
+      };
+      timeline.push(set_report_stim);
+
+      // Display questions
+      var report_Qs = {
+          type: jsPsychSurveyText,
+          preamble: "<div><p style='width:700px'>"+
+          "Please report any issues you may have encountered during each task (e.g. a technical problem)."+
+          '<br></p></div>',
+          button_label: 'Done',
+          questions: [
+          {
+            prompt: "<div><h4>The Video Task</h4></div>",
+            name: "video_issue"
+          },
+          {
+            prompt: function(){ return "<div><h4>The "+ pre_task +" Task</h4></div>" },
+            name: "pre_issue"
+          },
+          {
+            prompt: "<div><h4>The Pleasantness Task</h4></div>",
+            name: "encoding_issue"
+          },
+          {
+            prompt: function(){ return "<div><h4>The "+ post_task +" Task</h4></div>" },
+            name: "post_issue"
+          },
+          {
+            prompt: "<div><h4>The Memory Task</h4></div>",
+            name: "memory_issue"
+          }
+        ]
+      };
+      timeline.push(report_Qs);
+
+
+      //jsPsych.run(timeline);
+
+// OR jatos
+      jatos.onLoad(() => {
+        jatos.batchSessionVersioning = false;
+        console.log('report issues start');
+        PPID = jatos.studySessionData.PP_ID;
+        retrieveThings();
+        jsPsych.run(timeline);
+      });
+
+</script>
+</html>
