@@ -1,0 +1,309 @@
+<!-- <!DOCTYPE html> -->
+<html>
+  <head>
+    <title>Experiment</title>
+
+    <!--
+      This script shows pps a sequence of words and asks them to decide whether they find the word pleasant/unpleasant.
+      The words are selected based on the counterbalance groups and the day of the test.
+      This script will also reject pps if they do not make enough responses, or if the majority of their responses are faster than 150ms.
+    -->
+
+    <!-- Note the experiment settings have ben set in the init jspsych -->
+    
+
+    <script src="jatos.js"></script>
+    <script>
+      var task_name = 'Pleasantness Task';
+      var banner_colour = " " // temporarily set this as blank so that there is no error when js reads all the variables
+    </script>
+    
+    <script src="jspsych-7.3.0/jspsych.js"></script>
+<!-- load plugins here -->
+
+    <script src="stimuli.js"></script>
+    <script src="jspsych-7.3.0/plugin-html-keyboard-response-modified.js"></script>
+    <script src="jspsych-7.3.0/plugin-html-button-response.js"></script>
+    <link href="jspsych-7.3.0/jspsych.css" rel="stylesheet" type="text/css" />
+
+  </head>
+
+  <style>
+      
+      .banner {
+      position: fixed;
+      width: 100%;
+      top: 0;
+      left: 0;
+      color: White;
+      background-color: gray;
+      text-align: center;
+      font-weight: bold;
+      font-size: 1.17em;
+      }
+
+      .stim {
+      font-size:40px;
+      }
+
+  </style>
+
+
+  <body></body>
+  <script>
+
+      // var jsPsych = initJsPsych({
+      //       case_sensitive_responses: false,
+      //       experiment_width: 700,
+      //       on_finish: function() {
+      //       jsPsych.data.displayData();
+      //     }
+      //     });
+
+
+
+      // OR jatos
+      var jsPsych = initJsPsych({
+        case_sensitive_responses: false,
+        experiment_width: 700,
+        on_finish: function () {
+          jsPsych.data.addProperties({ subID: jatos.studySessionData.PP_ID });
+          jsPsych.data.addProperties({ expGrp: exp_grp });
+          jsPsych.data.addProperties({ counterbalance: CB });
+          jsPsych.data.addProperties({ taskName: "encoding_pleasantness" });
+          jatos.startComponentByPos( 11, jsPsych.data.get().json()); // Component position for the redirect script
+        }
+      });
+
+      var timeline = [];
+
+      // DEFINE GLOBAL VARIABLES
+      var ppVariables, CB, PPID, exp_grp, problem, termination_stim;
+      var stim_indices = [];
+      var banner_colour = "id='standard'"
+
+      // DEFINE FUNCTIONS
+      function retrieveThings(){
+        // PP BATCH SESSION DATA
+        ppVariables = jatos.batchSession.find("/" + PPID); // returns object containing pp's variables
+
+        // CB
+        CB = ppVariables['counterbalance'];
+
+        //EXP_GRP
+        exp_grp = ppVariables['experimental_group'];
+
+        // TASK_NUM COMPONENT PROPS
+        //task_num = jatos.componentJsonInput.task_number;
+      };
+
+      // Function to change the background colour of screen so pps know when their responses have been recorded
+      function change_background(e) {
+          if(e.keyCode == 70 || e.keyCode == 74) { // numbers refer to the F or J keys
+            document.body.style.backgroundColor = '#BFBFBF' // change color as needed
+
+            // Code below times the colour change out
+              // setTimeout(function () {
+              //   document.body.style.backgroundColor = '#FFFFFF'
+              // }, 500) // change duration as needed
+          }
+      };
+
+
+      // Find indices of words in the stimulus set based on the CB group, the test day, and the list each word belongs to. These indicees will be used later to select the stimuli.
+      var set_stim = {
+        type: jsPsychHtmlKeyboardResponse,
+        choices: 'NO_KEYS',
+        stimulus: '',
+        trial_duration: 1,
+        on_start: function(){
+
+          // Set x to the correct list (dependent upon CB group, day etc).
+          var x;
+
+          if (CB == 1){
+            x = "A";
+          } else if (CB == 2){
+            x = "B";
+          } else if (CB == 3){
+            x = "C";
+          } else if (CB == 4){
+            x = "D";
+          }
+          
+          //console.log(x);
+
+          // Produce an array of indices corresponding to words from the correct list (i.e. x), these indicies will then be used to select the timeline stimuli.
+          // Line below goes through big stim array and finds the index of each object where list = A (or B or C or D), works by changing the index of items with other list types to be blank string, then filters out any blank strings.
+          var list_ind = master_word_stim.map(function(o) {return o.list; }).map((e,i) => e == x ? i : '').filter(String);
+
+          // Randomise the array
+          list_ind = jsPsych.randomization.shuffle(list_ind);
+
+          stim_indices.push(...list_ind);
+          //console.log (stim_indices);
+
+        },
+
+      };
+      timeline.push(set_stim);
+
+
+      // Instruction reminder
+      var encoding_instruct_reminder = {
+          type: jsPsychHtmlKeyboardResponse,
+          stimulus: function(){
+            return "<div class='banner'><h2>Pleasantness Task</h2></div>" + // banner from CSS at top
+            "<div>"+
+            "<h2>F = PLEASANT&emsp;/&emsp;J = UNPLEASANT</h2>"+
+            "<br><br>"+
+            "Does the word feel pleasant or unpleasant?"+
+            "<br><br>"+
+            "<p>Hover your forefingers over the F and J keys. Press the F or J key to begin.</p>"+
+            "</div>"
+          },
+          choices: ['f','j'],
+          //post_trial_gap: 500 // don't have this cos it will make the banner flash
+      };
+      timeline.push(encoding_instruct_reminder);
+
+
+      // Cycle through word list
+      var encoding_procedure = {
+          timeline: [
+            {
+            // fixation cross for 500ms ITI - it can't be 300ms bc I think the functions take too long to load and the timing gets messed up (not sure?)
+                type: jsPsychHtmlKeyboardResponse,
+                stimulus: function(){
+                  return "<div class='banner'><h2>Pleasantness Task</h2></div>" + // banner from CSS at top
+                  "<div class='stim';><p>+</p></div>" // fixation cross
+                },
+                choices: "NO_KEYS",
+                trial_duration: 500
+            },
+            {
+            // display word for 3000ms
+                type: jsPsychHtmlKeyboardResponse,
+                stimulus: function(){
+                  return "<div class='banner'><h2>Pleasantness Task</h2></div>" + // banner from CSS at top
+                  "<div class='stim';><p>" + jsPsych.timelineVariable('word') + "</p></div>"
+                },
+                choices: ['f', 'j'],
+                trial_duration: 3000,
+                response_ends_trial: false,
+                on_start: function(){ document.addEventListener("keydown", change_background) },
+                on_finish: function(){ 
+                  document.body.style.backgroundColor = '#FFFFFF'
+                  document.removeEventListener("keydown", change_background) },
+                data: {
+                  task: 'word_trial'
+                }
+            }
+          ],
+          timeline_variables: master_word_stim,
+          sample: {
+            type: 'custom',
+            fn: function(){return stim_indices} // From set_stim trial
+          }
+      };
+      timeline.push(encoding_procedure);
+
+
+      // Check data so can terminate if inattentive
+      var data_calc = {
+        type: jsPsychHtmlKeyboardResponse,
+        stimulus: ' ',
+        choices: "NO_KEYS",
+        trial_duration: 1,
+        on_start: function(){
+
+          // GET PP RESPONSES
+          var encoding_trials = jsPsych.data.get().filter({ task : 'word_trial'});
+          encoding_trials = encoding_trials.trials;
+
+          // CALCULATE NUMBER OF NULL RESPONSES
+          var no_resp_trials = encoding_trials.filter(trial => { return trial.rt == null }); 
+          var no_resp_trial_count = no_resp_trials.length;
+
+          // TERMINATE IF DIDNT REPOND TO MORE THAN 70% OF TOTAL TRIALS
+          if ( no_resp_trial_count > 11){
+            problem = true
+            termination_stim = '<div><h1>Your involvement has been terminated.</h1>'+
+              '<p style="width:700px">Our research depends upon participants being engaged and concentrating. You did not make a response to more than 70% of the trials on this task. This means your involvement in the study is terminated. This page should redirect you to Prolific when you click "Exit". Copy the completion code "CHVB4HI7".</p><br>'+
+              '</div>';
+            console.log('pp did not respond to more than 70% of trials');
+          }
+
+          // CALCULATE NUMBER OF VERY FAST TRIALS
+          var fast_trials = encoding_trials.filter(trial => { return trial.rt < 150 && trial.rt != null });
+          var fast_trial_count = fast_trials.length;
+
+          // TERMINATE IF RESPONDED TOO QUICK TO MORE THAN 70% OF TRIALS
+          if ( fast_trial_count > 11){
+            problem = true;
+            termination_stim = '<div><h1>Your involvement has been terminated.</h1>'+
+              '<p style="width:700px">Our research depends upon participants being engaged and concentrating. Your involvement in the study has been terminated because the speed of your responses exceeds the threshold for reading each word, deciding upon and making a response. This page should redirect you to Prolific when you click "Exit". Copy the completion code "CHVB4HI7".</p><br>'+
+              '</div>';
+            console.log('pp responded too quickly to more than 70% of trials');
+          }
+
+          if ( problem === true ){
+            // Update batch session data
+            ppVariables['terminated'] = true;
+            
+            jatos.batchSession.set(PPID, ppVariables)
+              .then(() => console.log("Batch Session was successfully updated"))
+              .catch(() => console.log("Batch Session synchronization failed"));
+
+          }
+
+        }
+      };
+      timeline.push(data_calc);
+
+
+      
+      // Termination message
+      var encoding_termination_message_trial = {
+        type: jsPsychHtmlButtonResponse,
+        stimulus: function(){ return termination_stim },
+        choices: ["Exit"],
+        on_finish: function(){
+          jatos.submitResultData(jsPsych.data.get().json());
+          jatos.endStudyAndRedirect("https://app.prolific.com/submissions/complete?cc=CHVB4HI7"); // Should redirect and save pp to failed attention check group
+        }
+      };
+
+      // conditional timeline for termination message
+      var if_node_terminate_encoding = {
+        timeline: [encoding_termination_message_trial],
+        conditional_function: function(){
+          if ( problem == true ){
+            return true
+          } else { return false }
+        }
+      };
+      timeline.push(if_node_terminate_encoding);
+
+
+
+      var move_on_trial = {
+        type: jsPsychHtmlKeyboardResponse,
+        stimulus: ' ',
+        choices: "NO_KEYS",
+        trial_duration: 1
+      };
+      //timeline.push(move_on_trial);
+      
+
+// OR jatos
+      jatos.onLoad(() => {
+        jatos.batchSessionVersioning = false;
+        console.log('pleasantness start');
+        PPID = jatos.studySessionData.PP_ID;
+        retrieveThings();
+        jsPsych.run(timeline);
+      });
+
+</script>
+</html>
