@@ -1,0 +1,96 @@
+<!-- <!DOCTYPE html> -->
+<html>
+  <head>
+    <title>Experiment</title>
+
+    <!--
+      Script:
+      Run this to change any element of the batch session data
+    -->
+
+
+    <script src="jatos.js"></script>
+    <script src="jspsych-7.3.0/jspsych.js"></script>
+<!-- load plugins here -->
+
+    <script src="jspsych-7.3.0/plugin-html-keyboard-response.js"></script>
+
+    <link href="jspsych-7.3.0/jspsych.css" rel="stylesheet" type="text/css" />
+  </head>
+  <body></body>
+  <script>
+
+      // var jsPsych = initJsPsych({
+      //       on_finish: function() {
+      //       jsPsych.data.displayData();
+      //     }
+      //     });
+
+      // OR jatos
+      var jsPsych = initJsPsych({
+          		on_finish: function () {
+          			//jsPsych.data.addProperties({ subID: jatos.studySessionData.subjectID });
+          			jatos.endStudy(jsPsych.data.get().json());
+          		}
+          	});
+
+      var timeline = [];
+
+      
+      // DEFINE GLOBAL VARIABLES
+      var PPID_to_change, ppVariables, existing_field, reset_value;
+      var on_screen_text = "reset script";
+
+
+      // DEFINE FUNCTIONS
+      // RESET SESSION TRACKER IN BATCH SESSION DATA
+      function batchDataReset(){
+        // FETCH PPID
+        PPID_to_change = jatos.componentJsonInput.PPID_edit;
+
+        if (PPID_to_change == null){
+          on_screen_text = "nothing to reset";
+          return
+        }
+        // PP BATCH SESSION DATA
+        ppVariables = jatos.batchSession.find("/" + PPID_to_change); // returns object containing pp's variables
+
+        // COMPONENT PROPS
+        existing_field = jatos.componentJsonInput.existing_batch_field;
+        reset_value = jatos.componentJsonInput.reset_batch_value;
+
+        // RESET
+        ppVariables[existing_field] = reset_value;
+
+        // DISPLAY TEXT
+        on_screen_text = "resetting..."
+
+        // UPDATE BATCH SESSION DATA
+        jatos.batchSession.set(PPID_to_change, ppVariables)
+          .then(() => console.log("Batch Session was successfully updated"))
+          .catch(() => console.log("Batch Session synchronization failed"));
+      };
+
+      
+      var set_something = {
+        type: jsPsychHtmlKeyboardResponse,
+        stimulus: on_screen_text,
+        choices: "NO_KEYS",
+        trial_duration: 3000
+      };
+      timeline.push(set_something);
+
+
+
+      //jsPsych.run(timeline);
+
+      // OR jatos
+      jatos.onLoad(() => {
+        jatos.batchSessionVersioning = false;
+        console.log('batch reset start');
+        batchDataReset();
+        jsPsych.run(timeline);
+      });
+
+</script>
+</html>
