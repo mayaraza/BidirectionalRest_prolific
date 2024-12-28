@@ -1,0 +1,72 @@
+
+<!-- <!DOCTYPE html> -->
+<html>
+  <head>
+    <title>Experiment</title>
+
+    <!--
+      Redirects pps to correct component based on taskTracker and ppVariables
+    -->
+
+
+    <script src="jatos.js"></script>
+
+  </head>
+  <body></body>
+  <script>
+
+
+      // DEFINE GLOBAL VARIABLES
+      var PPID, task_num, redirectComponent;
+
+
+      // Define function to retrieve the session tracker and decide which component to redirect to
+      function taskRedirect(){
+
+        // RETRIEVE RELEVANT VARIABLES
+        var ppVariables = jatos.batchSession.find("/" + PPID);
+        var expGrp = ppVariables.experimental_group;
+
+        // CKECK VALUE OF TASK TRACKER
+        if (task_num == 1){         // Pre-encoding task
+
+          if (expGrp <= 2){          // RR and RE grps
+            redirectComponent = ;   // Relaxation task
+
+          } else {                  // ER and EE grps
+            redirectComponent = ;   // Spotdiff task
+          }
+
+
+        } else if (task_num == 2){  // Encoding task
+          redirectComponent = 14;
+
+
+        } else if (task_num == 3){  // Post-encoding task
+
+          if (expGrp % 2 == 0 ){          // RE and EE grps
+            redirectComponent = ;   // Spotdiff task
+
+          } else {                  // ER and RR grps
+            redirectComponent = ;   // Relaxation task
+          }
+
+        } else if (task_num == 4){  // Free recall task
+          redirectComponent = 15;
+
+        };
+      };
+
+
+      // Run jatos
+      jatos.onLoad(() => {
+        jatos.batchSessionVersioning = false;
+        console.log('redirect start');
+        task_num = jatos.studySessionData.taskTracker;
+        PPID = jatos.studySessionData.PP_ID;
+        taskRedirect();
+        jatos.startComponentByPos(redirectComponent);
+      });
+
+</script>
+</html>
