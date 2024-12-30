@@ -25,11 +25,11 @@
   <script>
 
       // DEFINE GLOBAL VARIABLES
-      var PPID, pref_exp_grp, pref_CB, pp_CB, pp_expgrp, slots_array, pp_slot, batch_num;
+      var PPID, ppVariables, redirectComponent;
 
       var jsPsych = initJsPsych({
         on_finish: function(){
-          jatos.startNextComponent();
+          jatos.startComponentByPos(redirectComponent);
         }
       });
 
@@ -84,12 +84,14 @@
         // Check if PPID exists in the batch session data (returns true/false)
         if (!jatos.batchSession.defined("/"+ PPID)){ // If the PPID doesn't already exist
 
+          redirectComponent = 2; // next component
+
           // STORE CB, SET EXP_GRP TO 5, SET SESSION TRACKER TO 1
           jatos.batchSession.add("/"+ PPID , {'slot' : null,                  // number 1-16 representing both the CB and expGrp
                                               'recruitment_run' : null,       // will be set to recruitment stored in study properties
                                               'counterbalance' : null,        // CB and expGrp are later computed from slot and stored separately - this could all be handled by slot but splitting them out makes it easier when analysing data
                                               'experimental_group' : null,    // as CB above
-                                              'repeatable' : true,            // sets to false after encoding or spot the difference task, bc if pps return their submission and restart then they won't be able to do the session having already seen the words and pictures, but could feasibly repeat 
+                                              'completed' : false,            // sets to true after encoding or spot the difference task, bc if pps return their submission and restart then they won't be able to do the session having already seen the words and pictures, but could feasibly repeat 
                                               'start_time' : null,            // could be useful data
                                               'comprehension_attempt' : 0 ,   // records number of attempts of instruction comprehension test
                                               'terminated' : false,           // records whether participant has been terminated
@@ -97,6 +99,23 @@
             .then(() => console.log("Batch Session was successfully updated"))
             .catch(() => console.log("Batch Session synchronization failed"));
 
+
+        } else { // If PPID does exist
+
+          ppVariables = jatos.batchSession.find("/" + PPID); // returns object containing pp's variables
+          
+          // Check whether this participant has been terminated / has already done key parts of the experiment
+          var termination_status = ppVariables['terminated'];
+          var complete_status = ppVariables['completed'];
+          
+          
+          if ( termination_status == true || complete_status == true ){ // if the pp has been terminated or has done key parts of the experiment already
+            redirectComponent = 20; // component for 'cannot complete' message
+            
+          } else {
+            redirectComponent = 2; // next component
+
+          }
         }
       };
 
