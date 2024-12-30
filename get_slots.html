@@ -102,7 +102,7 @@
           // Everything could be handled with the slot value but splitting it out in the batch session data is easier for data analysis later
 
           // Work out the CB from the slot
-          pp_CB = ((slot - 1) % 4) + 1;
+          pp_CB = ((slot_assigned - 1) % 4) + 1;
           ppVariables['counterbalance'] = pp_CB;
 
           // Work out the exp_grp from the slot

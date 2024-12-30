@@ -61,6 +61,8 @@
       var jsPsych = initJsPsych({
         //experiment_width: 700,
         on_finish: function () {
+          jatos.studySessionData.taskTracker++; // increment task tracker by 1 ready for redirect script
+
           jsPsych.data.addProperties({ subID: jatos.studySessionData.PP_ID });
           jsPsych.data.addProperties({ taskName: "TFD" });
           jsPsych.data.addProperties({ expGrp: exp_grp });
@@ -430,6 +432,7 @@
       jatos.onLoad(() => {
         jatos.batchSessionVersioning = false;
         console.log('relax start');
+        //console.log(jatos.studySessionData.taskTracker);
         PPID = jatos.studySessionData.PP_ID;
         retrieveThings();
         jsPsych.run(timeline);

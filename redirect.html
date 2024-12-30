@@ -31,10 +31,10 @@
         if (task_num == 1){         // Pre-encoding task
 
           if (expGrp <= 2){          // RR and RE grps
-            redirectComponent = ;   // Relaxation task
+            redirectComponent = 12;   // Relaxation task
 
           } else {                  // ER and EE grps
-            redirectComponent = ;   // Spotdiff task
+            redirectComponent = 20;   // Spotdiff task
           }
 
 
@@ -45,10 +45,10 @@
         } else if (task_num == 3){  // Post-encoding task
 
           if (expGrp % 2 == 0 ){          // RE and EE grps
-            redirectComponent = ;   // Spotdiff task
+            redirectComponent = 20;   // Spotdiff task
 
           } else {                  // ER and RR grps
-            redirectComponent = ;   // Relaxation task
+            redirectComponent = 12;   // Relaxation task
           }
 
         } else if (task_num == 4){  // Free recall task
