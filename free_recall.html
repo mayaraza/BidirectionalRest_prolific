@@ -50,6 +50,7 @@
       var jsPsych = initJsPsych({
         experiment_width: 700,
     		on_finish: function () {
+          jatos.studySessionData.taskTracker++; // increment task tracker by 1 to track progress
     			jsPsych.data.addProperties({ subID: jatos.studySessionData.PP_ID });
           jsPsych.data.addProperties({ taskName: "free_recall" });
           jsPsych.data.addProperties({ CB: CB });

@@ -67,6 +67,7 @@
         case_sensitive_responses: false,
         experiment_width: 700,
         on_finish: function () {
+          jatos.studySessionData.taskTracker++; // increment task tracker by 1 ready for redirect script
           jsPsych.data.addProperties({ subID: jatos.studySessionData.PP_ID });
           jsPsych.data.addProperties({ expGrp: exp_grp });
           jsPsych.data.addProperties({ counterbalance: CB });
@@ -162,7 +163,7 @@
             "<p>Hover your forefingers over the F and J keys. Press the F or J key to begin.</p>"+
             "</div>"
           },
-          choices: ['f','j'],
+          choices: ['f','j']
           //post_trial_gap: 500 // don't have this cos it will make the banner flash
       };
       timeline.push(encoding_instruct_reminder);
@@ -254,7 +255,7 @@
           };
 
           // Set repeatable to false for all pps - pps should not repeated the experiment if they have seen the words
-          ppVariables['repeatable'] = false;
+          ppVariables['completed'] = true;
 
           // Update batch session object
           jatos.batchSession.set(PPID, ppVariables)

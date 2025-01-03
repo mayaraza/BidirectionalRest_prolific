@@ -62,7 +62,6 @@
         //experiment_width: 700,
         on_finish: function () {
           jatos.studySessionData.taskTracker++; // increment task tracker by 1 ready for redirect script
-
           jsPsych.data.addProperties({ subID: jatos.studySessionData.PP_ID });
           jsPsych.data.addProperties({ taskName: "TFD" });
           jsPsych.data.addProperties({ expGrp: exp_grp });
