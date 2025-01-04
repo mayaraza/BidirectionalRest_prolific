@@ -39,15 +39,30 @@
     var jsPsych = initJsPsych({
         extensions: [{ type: jsPsychExtensionMouseTracking }],
         on_finish: function () {
-          jsPsych.data.addProperties({ subID: jatos.studySessionData.subjectID, ProlificID: jatos.studySessionData.ProlificID });
-          jatos.startNextComponent(jsPsych.data.get().json())
+          jatos.studySessionData.taskTracker++; // increment task tracker by 1 ready for redirect script
+          jsPsych.data.addProperties({ subID: jatos.studySessionData.PP_ID });
+          jsPsych.data.addProperties({ expGrp: exp_grp });
+          jsPsych.data.addProperties({ counterbalance: CB });
+          jsPsych.data.addProperties({ taskName: "spot_difference" });
+          jatos.startComponentByPos( 11, jsPsych.data.get().json()); // Component position for the redirect script
         }
     });
     
     var timeline = [];
 
-    var time_to_instruct; //needed so that the time elapsed value stored from the instructions trial is available later in the script
-    
+    // Define global variables
+    var PPID, ppVariables, CB, exp_grp, problem, termination_stim, time_to_instruct;
+
+    function retrieveThings(){
+        // PP BATCH SESSION DATA
+        ppVariables = jatos.batchSession.find("/" + PPID); // returns object containing pp's variables
+        
+        // CB
+        CB = ppVariables['counterbalance'];
+
+        //EXP_GRP
+        exp_grp = ppVariables['experimental_group'];
+      };
 
     // Function to change the background colour of screen so pps know when their responses have been recorded
     // Function invoked as part of jspsych's event listeners
@@ -61,8 +76,6 @@
             }, 300) // change duration as needed
         }
     };
-    // if change background function is needed then i think i need to add this to on stat and then cancel at the end
-    //  document.addEventListener("mousedown", change_background)
 
 
       // Instruction reminder
@@ -84,7 +97,7 @@
       timeline.push(spotdiff_instruct_reminder);
 
 
-    // Displays image pairs, 
+    // Displays image pairs, records mouse clicks, runs for given length of time
     var image_trial = {
       type: jsPsychHtmlButtonResponse,
       button_html: '<button class="jspsych-btn button";>%choice%</button>', //positions button so it is visible behind image
@@ -129,17 +142,107 @@
 	  };
 
 
-    var procedure = {
+    var spot_diff_procedure = {
       timeline: [image_trial],
       timeline_variables: spot_diff_stim_array,
       randomize_order: true
     };
-    timeline.push(procedure);
+    timeline.push(spot_diff_procedure);
 
-//need to remember to ignore final click in data as that is on the done button
+    // Check performance for termination
+    var data_calc = {
+      type: jsPsychHtmlKeyboardResponse,
+      stimulus: 'Pause',
+      choices: [' '],
+      on_start: function(data){
+
+        // Line below not working but might be fine as mousetracking extension not used in subsequent scripts so might cancel listener?
+        document.removeEventListener("keydown", change_background); // ensures event listener for changing background colour is not still running
+
+        // Get the trial data
+        var spot_diff_data = jsPsych.data.get().filter({ task : 'image_trial'});
+        spot_diff_data = spot_diff_data.trials;
+
+        // Calculate how many clicks have been made throughout the entire task
+        let totalClicks = 0;
+        let fewClickTrials = 0;
+
+        // Iterate through each element in the outer array
+        spot_diff_data.forEach(element => {
+          if (element.mouse_tracking_data && Array.isArray(element.mouse_tracking_data)) { // Checks that the mouse_tracking_data array exists in the trial data - might help with errors
+            
+            // Work out the total number of clicks made during the task
+            totalClicks += element.mouse_tracking_data.length; // Add the length of the nested mouse_tracking_data array to the total length
+
+            // If there was only 1 click made on a trial, record this as a 'few clicks' trial (pp may have clicked done to move through as quick as possible)
+            if (element.mouse_tracking_data.length <= 1 ){
+              fewClickTrials++ // increment few click counter
+            }
+          }
+          return totalClicks, fewClickTrials;
+        });
+
+
+        // Note that the click counts include clicks on the 'Next' button. Hopefully the termination criteria is relaxed enough for this to be ok. Otherwise could deal with by ignoring the final click on trials with a short trial duration?
+        // Terminate if: pps made fewer than 5 clicks during whole task, pps made more than 15 clicks per trial (on average), pps had more than 5 trials with only 1 click
+        if ( totalClicks <= 5 || fewClickTrials >= 5 || totalClicks / spot_diff_data.length > 15 ){
+          console.log('terminate')
+          problem = true
+            termination_stim = '<div><h1>Your involvement has been terminated.</h1>'+
+              '<br><br>'+
+              '<p style="width:700px">Our research depends upon participants being engaged and concentrating. Your pattern of clicks suggests you were not adequately engaged in this task so your involvement in the study is terminated. This page should redirect you to Prolific when you click "Exit". Copy the completion code "CHVB4HI7".</p><br>'+
+              '</div>';
+
+        };
+
+        if ( problem === true ){
+            // Set termination to true if there is a problem
+            ppVariables['terminated'] = true;
+
+          };
+
+          // Set completed to true for all pps - pps should not repeated the experiment if they have seen the images (it will be less effortful if they are repeated)
+          ppVariables['completed'] = true;
+
+          // Update batch session object
+          jatos.batchSession.set(PPID, ppVariables)
+              .then(() => console.log("Batch Session was successfully updated"))
+              .catch(() => console.log("Batch Session synchronization failed"));
+
+      }
+    };
+    timeline.push(data_calc);
+
+
+
+     // Termination message
+     var spotdiff_termination_message_trial = {
+        type: jsPsychHtmlButtonResponse,
+        stimulus: function(){ return termination_stim },
+        choices: ["Exit"],
+        on_finish: function(){
+          jatos.submitResultData(jsPsych.data.get().json());
+          jatos.endStudyAndRedirect("https://app.prolific.com/submissions/complete?cc=CHVB4HI7"); // Should redirect and save pp to failed attention check group
+        }
+      };
+
+      // conditional timeline for termination message
+      var if_node_terminate_spotdiff = {
+        timeline: [spotdiff_termination_message_trial],
+        conditional_function: function(){
+          if ( problem == true ){
+            return true
+          } else { return false }
+        }
+      };
+      timeline.push(if_node_terminate_spotdiff);
 
 
     jatos.onLoad(() => {
+      jatos.batchSessionVersioning = false;
+      console.log('spot diff start');
+      PPID = jatos.studySessionData.PP_ID;
+      retrieveThings();
       jsPsych.run(timeline);
     });
   </script>
