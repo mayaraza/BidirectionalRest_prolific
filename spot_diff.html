@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Experiment</title>
+    <script src="jatos.js"></script>
+    <script src="jspsych-7.3.0/jspsych.js"></script>
+    <script src="jspsych-7.3.0/plugin-html-button-response.js"></script>
+    <script src="jspsych-7.3.0/plugin-html-keyboard-response.js"></script>
+    <script src="jspsych-7.3.0/extension-mouse-tracking.js"></script>
+    <script src="stimuli.js"></script>
+    <link href="jspsych-7.3.0/jspsych.css" rel="stylesheet" type="text/css" />
+  </head>
+  <style>
+      
+    .banner {
+    position: fixed;
+    width: 100%;
+    top: 0;
+    left: 0;
+    color: White;
+    background-color: gray;
+    text-align: center;
+    font-weight: bold;
+    font-size: 1.17em;
+    }
+
+    /* .stim {
+    font-size:40px;
+    } */
+
+    .imagepos {position: absolute; top: 0px; left: 0px;} /*mouse tracking is relative to top left of screen, so this ensure image is presented on top left, therefore tracked clicks will be essentially relative to the image (hopefully)*/
+    .button {position: absolute; top: 780px; left: 10px;} /*sets position of button so it is visible with the larger images*/
+    .prompt {position: absolute; top: 750px; left: 10px;}
+
+</style>
+  <body></body>
+  <script>
+    //this script presents one image and records mouse clicks on the screen
+    var jsPsych = initJsPsych({
+        extensions: [{ type: jsPsychExtensionMouseTracking }],
+        on_finish: function () {
+          jsPsych.data.addProperties({ subID: jatos.studySessionData.subjectID, ProlificID: jatos.studySessionData.ProlificID });
+          jatos.startNextComponent(jsPsych.data.get().json())
+        }
+    });
+    
+    var timeline = [];
+
+    var time_to_instruct; //needed so that the time elapsed value stored from the instructions trial is available later in the script
+    
+
+    // Function to change the background colour of screen so pps know when their responses have been recorded
+    // Function invoked as part of jspsych's event listeners
+    function change_background(e) {
+        if(e.button == 0) { // 0 refers to left mouse click
+          document.body.style.backgroundColor = '#BFBFBF' // change color as needed
+
+          // Code below times the colour change out
+            setTimeout(function () {
+              document.body.style.backgroundColor = '#FFFFFF' // change back to white
+            }, 300) // change duration as needed
+        }
+    };
+    // if change background function is needed then i think i need to add this to on stat and then cancel at the end
+    //  document.addEventListener("mousedown", change_background)
+
+
+      // Instruction reminder
+      var spotdiff_instruct_reminder = {
+        type: jsPsychHtmlButtonResponse,
+        stimulus: function(){
+          return "<div class='banner'><h2>Spot-the-Difference Task</h2></div>" + // banner from CSS at top
+          "<div>"+
+          "<p>Insert instructions reminder</p>"+
+          "<br><br>"+
+          "</div>"
+        },
+        choices: ['Begin'],
+        post_trial_gap: 500,
+        on_finish: function(data){
+          time_to_instruct = jsPsych.data.get().select('time_elapsed').values; //finds out how long it took before the pp began the task
+        }
+      };
+      timeline.push(spotdiff_instruct_reminder);
+
+
+    // Displays image pairs, 
+    var image_trial = {
+      type: jsPsychHtmlButtonResponse,
+      button_html: '<button class="jspsych-btn button";>%choice%</button>', //positions button so it is visible behind image
+	    stimulus: jsPsych.timelineVariable('img_distractor'),
+      prompt: function(){return '<div class="prompt">There are ' + jsPsych.timelineVariable('num_diff') + ' differences here. Click on the left-hand image.</div>'},
+      choices: ['Next'],
+      trial_duration: 10000, //trial times out after 1 min
+      on_load(params){ //this on load function hides the advance button until at least 1min has passed to make sure pps cannot progress too quickly through the distractor task
+        console.log(time_to_instruct);
+        var button = document.getElementById("jspsych-html-button-response-btngroup");
+        button.style.visibility = "hidden";
+        setTimeout(function() {
+          button.style.visibility = "visible";
+        }, 5000); //should be 30000 //hide button until 30s has passed
+      },
+      on_start: function (trial) {
+      // Dynamically add the hidden message to the stimulus
+        trial.stimulus += '<p id="hidden-message" style="display:none;">You clicked the mouse button! Here is your message.</p>';
+      
+        document.addEventListener("mousedown", change_background);
+        
+      },
+	    extensions: [{ 
+            type: jsPsychExtensionMouseTracking, //track mouse clicks
+            params: { events: ['mousedown'] }
+      }],
+      data: {
+        task: 'image_trial' // each new trial will be marked in the jspsych data with 'image_trial'
+      },
+      on_finish: function(data){
+        document.removeEventListener("keydown", change_background);
+
+        var time_elapsed_vals = jsPsych.data.get().select('time_elapsed').values; //this is getting all the time_elapsed values so far
+        var time_to_this_trial = time_elapsed_vals.slice(-1);//get the time elapsed between this trial and the start of the experiment
+        var time_since_task_start = parseFloat(time_to_this_trial) - parseFloat(time_to_instruct);//get the time since the start of the task by taking away the time for the instructions
+        //if the time is greater than 5mins then finish the trial, save the data, and end the current timeline (ie. end this task).
+        if (time_since_task_start > 30000){ // should be 300000
+          jsPsych.finishTrial(data);
+          jsPsych.endCurrentTimeline();
+        }
+      }
+	  };
+
+
+    var procedure = {
+      timeline: [image_trial],
+      timeline_variables: spot_diff_stim_array,
+      randomize_order: true
+    };
+    timeline.push(procedure);
+
+//need to remember to ignore final click in data as that is on the done button
+
+
+    jatos.onLoad(() => {
+      jsPsych.run(timeline);
+    });
+  </script>
+</html>

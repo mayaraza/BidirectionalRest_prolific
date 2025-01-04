@@ -1,6 +1,6 @@
 
 
-// Word stimuli for encoding and recognition tasks
+// Word stimuli for encoding task
 var master_word_stim = [
     
 {word: 'ANCHOR', list: 'A'},
@@ -74,6 +74,31 @@ var master_word_stim = [
 
 ];
 
+
+// Image pairs for spot the difference task - these were sources from Readers' Digest
+var spot_diff_stim_array = [
+    //{img: '<div class="imagepos"><img src= "spotdiffpic1.png"></div>'},
+    {img_distractor: '<div class="imagepos"><img src= "stimuli/spot_diff_stim/balloons.jpg"></div>', num_diff: 8},
+    {img_distractor: '<div class="imagepos"><img src= "stimuli/spot_diff_stim/beach.jpg"></div>', num_diff: 0},
+    {img_distractor: '<div class="imagepos"><img src= "stimuli/spot_diff_stim/bikes.jpg"></div>', num_diff: 0},
+    {img_distractor: '<div class="imagepos"><img src= "stimuli/spot_diff_stim/breakfast.jpg"></div>', num_diff: 6},
+    {img_distractor: '<div class="imagepos"><img src= "stimuli/spot_diff_stim/cafe.jpg"></div>', num_diff: 0},
+    {img_distractor: '<div class="imagepos"><img src= "stimuli/spot_diff_stim/cakes.jpg"></div>', num_diff: 0},
+    {img_distractor: '<div class="imagepos"><img src= "stimuli/spot_diff_stim/donuts.jpg"></div>', num_diff: 7},
+    {img_distractor: '<div class="imagepos"><img src= "stimuli/spot_diff_stim/flowers.jpg"></div>', num_diff: 0},
+    {img_distractor: '<div class="imagepos"><img src= "stimuli/spot_diff_stim/lavender.jpg"></div>', num_diff: 7},
+    {img_distractor: '<div class="imagepos"><img src= "stimuli/spot_diff_stim/omelette.jpg"></div>', num_diff: 7},
+    {img_distractor: '<div class="imagepos"><img src= "stimuli/spot_diff_stim/ornaments.jpg"></div>', num_diff: 7},
+    {img_distractor: '<div class="imagepos"><img src= "stimuli/spot_diff_stim/popcorn.jpg"></div>', num_diff: 7},
+    {img_distractor: '<div class="imagepos"><img src= "stimuli/spot_diff_stim/runners.jpg"></div>', num_diff: 0},
+    {img_distractor: '<div class="imagepos"><img src= "stimuli/spot_diff_stim/salad.jpg"></div>', num_diff: 7},
+    {img_distractor: '<div class="imagepos"><img src= "stimuli/spot_diff_stim/shoes.jpg"></div>', num_diff: 0},
+    {img_distractor: '<div class="imagepos"><img src= "stimuli/spot_diff_stim/soap.jpg"></div>', num_diff: 8},
+    {img_distractor: '<div class="imagepos"><img src= "stimuli/spot_diff_stim/stationery.jpg"></div>', num_diff: 0},
+    {img_distractor: '<div class="imagepos"><img src= "stimuli/spot_diff_stim/sushi.jpg"></div>', num_diff: 9},
+    {img_distractor: '<div class="imagepos"><img src= "stimuli/spot_diff_stim/traffic.jpg"></div>', num_diff: 7},
+    {img_distractor: '<div class="imagepos"><img src= "stimuli/spot_diff_stim/yellow.jpg"></div>', num_diff: 0}
+];
 
 
 
