@@ -1,0 +1,134 @@
+<!-- <!DOCTYPE html> -->
+<html>
+  <head>
+    <title>Experiment</title>
+
+    <!-- 
+      Show intro video and ask some questions about feelings of pleasantness
+     -->
+
+    <script src="jatos.js"></script>
+    <script src="jspsych-7.3.0/jspsych.js"></script>
+<!-- load plugins here -->
+    <script src="jspsych-7.3.0/plugin-html-button-response.js"></script>
+    <script src="jspsych-7.3.0/plugin-preload.js"></script>
+    <script src="jspsych-7.3.0/plugin-html-slider-response.js"></script>
+    <script src="jspsych-7.3.0/plugin-html-keyboard-response.js"></script>
+    <script src="jspsych-7.3.0/plugin-video-button-response.js"></script>
+    <link href="jspsych-7.3.0/jspsych.css" rel="stylesheet" type="text/css" />
+  </head>
+
+  <style> 
+
+		.information-header {
+			position: fixed;
+			width: 100%;
+			top: 0;
+			left: 0;
+			background-color: grey;
+			color: White;
+			text-align: center;
+      padding-bottom: 10px;
+      margin-bottom: 50px;
+		}
+
+		.information-body {
+			width: 700px;
+			height: 450px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+			/* padding: 10px 50px;  */
+			color: black;
+		}
+
+	</style>
+
+  <body></body>
+  <script>
+
+      var jsPsych = initJsPsych({
+        experiment_width: 700,
+        on_finish: function () {
+          jsPsych.data.addProperties({ subID: jatos.studySessionData.PP_ID });
+          jsPsych.data.addProperties({ expGrp: exp_grp });
+          jsPsych.data.addProperties({ taskName: "video_intro" });
+          jatos.startNextComponent( jsPsych.data.get().json())
+        }
+      });
+
+      var timeline = [];
+
+      // DEFINE GLOBAL VARIABLES
+      var PPID, ppVariables, exp_grp;
+
+      // DEFINE FUNCTIONS
+      function retrieveThings(){
+        // PP BATCH SESSION DATA
+        ppVariables = jatos.batchSession.find("/" + PPID); // returns object containing pp's variables
+
+        //EXP_GRP
+        exp_grp = ppVariables['experimental_group'];
+
+      };
+
+
+      // Preload images for use in the question instructions
+      // var vid_preload = {
+      //   type: jsPsychPreload,
+      //   images: instruct_imgs
+      // };
+      //timeline.push(vid_preload);
+
+
+      // Intro message
+      var video_instruct = {
+        type: jsPsychHtmlButtonResponse,
+        stimulus: function(){ return "<div class='information-header'><h1> Video Task </h1></div>"+
+          "<br><hr>" +
+          "<div class='information-body'><p>" +
+          'Instructions here'+
+          '<br><br>'+
+          'blah'
+          "</p></div><hr>"
+        },
+        choices: ['Begin']
+      };
+      timeline.push(video_instruct);
+
+
+      // video trial
+      var video_trial = {
+        type: jsPsychVideoButtonResponse,
+        stimulus: ['./stimuli/video_stim/drone_mountain_pexels.mp4'],
+        width: 700,
+        margin_vertical: 10, // so that the button appears slightly lower
+        choices: ['Done'],
+        response_allowed_while_playing: false
+      };
+      timeline.push(video_trial);
+
+
+      // Ask pps to rate their feelings of pleasantness
+      var feelings_Qs = {
+        type: jsPsychHtmlSliderResponse,
+        stimulus: `<div style="width:700px;">
+            <p>Use the slider to rate how pleasant you feel after watching the video.</p>
+            </div>`,
+        require_movement: true,
+        labels: ['Very pleasant', 'Neutral', 'Very unpleasant']
+      };
+      timeline.push(feelings_Qs);
+
+      
+// OR jatos
+      jatos.onLoad(() => {
+        jatos.batchSessionVersioning = false;
+        console.log('video start');
+        PPID = jatos.studySessionData.PP_ID;
+        retrieveThings();
+        jsPsych.run(timeline);
+      });
+
+</script>
+</html>
