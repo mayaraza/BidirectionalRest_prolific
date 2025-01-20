@@ -2,11 +2,16 @@
 <html>
   <head>
     <title>Experiment</title>
+
+<!-- Script for spot the difference task
+        Increments task tracker in the study ession data -->
+
     <script src="jatos.js"></script>
     <script src="jspsych-7.3.0/jspsych.js"></script>
     <script src="jspsych-7.3.0/plugin-html-button-response.js"></script>
     <script src="jspsych-7.3.0/plugin-html-keyboard-response.js"></script>
     <script src="jspsych-7.3.0/extension-mouse-tracking.js"></script>
+    <script src="jspsych-7.3.0/plugin-preload.js"></script>
     <script src="stimuli.js"></script>
     <link href="jspsych-7.3.0/jspsych.css" rel="stylesheet" type="text/css" />
   </head>
@@ -51,7 +56,8 @@
     var timeline = [];
 
     // Define global variables
-    var PPID, ppVariables, CB, exp_grp, problem, termination_stim, time_to_instruct;
+    var PPID, ppVariables, CB, exp_grp, problem, termination_stim, time_to_instruct, task_tracker, spot_diff_array1, spot_diff_array2;
+    var spot_diff_images = spot_diff_stim_array; // master stim array from stimuli.js - set this up here so that set stim trial works below, and as a fail safe
 
     function retrieveThings(){
         // PP BATCH SESSION DATA
@@ -62,10 +68,13 @@
 
         //EXP_GRP
         exp_grp = ppVariables['experimental_group'];
+
+        // Task tracker
+        task_tracker = jatos.studySessionData.taskTracker;
       };
 
     // Function to change the background colour of screen so pps know when their responses have been recorded
-    // Function invoked as part of jspsych's event listeners
+    // Invoked as part of jspsych's event listeners
     function change_background(e) {
         if(e.button == 0) { // 0 refers to left mouse click
           document.body.style.backgroundColor = '#BFBFBF' // change color as needed
@@ -78,23 +87,73 @@
     };
 
 
-      // Instruction reminder
-      var spotdiff_instruct_reminder = {
-        type: jsPsychHtmlButtonResponse,
-        stimulus: function(){
-          return "<div class='banner'><h2>Spot-the-Difference Task</h2></div>" + // banner from CSS at top
-          "<div>"+
-          "<p>Insert instructions reminder</p>"+
-          "<br><br>"+
-          "</div>"
-        },
-        choices: ['Begin'],
-        post_trial_gap: 500,
-        on_finish: function(data){
-          time_to_instruct = jsPsych.data.get().select('time_elapsed').values; //finds out how long it took before the pp began the task
-        }
+    // Set stimulus array - for most this will be the master array from stimuli.js, but for the effort-effort group this has to be created so that images don't repeat between tasks
+    var set_stim = {
+      type: jsPsychHtmlKeyboardResponse,
+      stimulus: "",
+      choices: "NO_KEYS",
+      trial_duration: 1,
+      on_finish: function(){ // assigns spot_diff_images which is the array used in the task timeline below
+
+        if (exp_grp == 4){ // effort-effort group - require stim array to be split so that images do not repeat between tasks
+          
+          if (task_tracker == 1){ // 1st task - create two separate arrays, assign one for now, store one for later
+
+            // Randomise master stim array (Fisher-Yates method)
+            for (let i = spot_diff_images.length - 1; i > 0; i--) {
+              const j = Math.floor(Math.random() * (i + 1));
+              [spot_diff_images[i], spot_diff_images[j]] = [spot_diff_images[j], spot_diff_images[i]];
+            };
+
+            // Split into 2 halves
+            var midpoint = Math.ceil(spot_diff_images.length / 2); // find the middle of the array (if odd number of items then one item will be inlcuded in one array)
+            spot_diff_array1 = spot_diff_images.slice(0, midpoint);
+            spot_diff_array2 = spot_diff_images.slice(midpoint);
+
+            // Store 2nd array in study session data for later
+            jatos.studySessionData.spotDiffStim2 = spot_diff_array2;
+
+            // Assign for use in current task
+            spot_diff_images = spot_diff_array1;
+            
+          } else { // 2nd task - assign array from study session data
+            spot_diff_images = jatos.studySessionData.spotDiffStim2;
+          }
+        };
+        // Don't need to do anything for other groups
+        
+      }
+    };
+    timeline.push(set_stim);
+
+
+    // Preload images
+    var spot_diff_preload = {
+      type: jsPsychPreload,
+      auto_preload: true
       };
-      timeline.push(spotdiff_instruct_reminder);
+      timeline.push(spot_diff_preload);
+
+
+    // Instruction reminder
+    var spotdiff_instruct_reminder = {
+      type: jsPsychHtmlButtonResponse,
+      stimulus: function(){
+        return "<div class='banner'><h2>Spot-the-Difference Task</h2></div>" + // banner from CSS at top
+        "<div>"+
+        "<p>Insert instructions reminder</p>"+
+        "<br><br>"+
+        "</div>"
+      },
+      choices: ['Begin'],
+      post_trial_gap: 500,
+      on_finish: function(data){
+        time_to_instruct = jsPsych.data.get().select('time_elapsed').values; //finds out how long it took before the pp began the task, needed for task timer
+
+        spot_diff_images= spot_diff_stim_array;
+      }
+    };
+    timeline.push(spotdiff_instruct_reminder);
 
 
     // Displays image pairs, records mouse clicks, runs for given length of time
@@ -141,13 +200,14 @@
       }
 	  };
 
-
+    // Timeline for trials
     var spot_diff_procedure = {
       timeline: [image_trial],
-      timeline_variables: spot_diff_stim_array,
+      timeline_variables: spot_diff_images,
       randomize_order: true
     };
     timeline.push(spot_diff_procedure);
+
 
     // Check performance for termination
     var data_calc = {
@@ -215,27 +275,27 @@
 
 
 
-     // Termination message
-     var spotdiff_termination_message_trial = {
-        type: jsPsychHtmlButtonResponse,
-        stimulus: function(){ return termination_stim },
-        choices: ["Exit"],
-        on_finish: function(){
-          jatos.submitResultData(jsPsych.data.get().json());
-          jatos.endStudyAndRedirect("https://app.prolific.com/submissions/complete?cc=CHVB4HI7"); // Should redirect and save pp to failed attention check group
-        }
-      };
+    // Termination message
+    var spotdiff_termination_message_trial = {
+      type: jsPsychHtmlButtonResponse,
+      stimulus: function(){ return termination_stim },
+      choices: ["Exit"],
+      on_finish: function(){
+        jatos.submitResultData(jsPsych.data.get().json());
+        jatos.endStudyAndRedirect("https://app.prolific.com/submissions/complete?cc=CHVB4HI7"); // Should redirect and save pp to failed attention check group
+      }
+    };
 
-      // conditional timeline for termination message
-      var if_node_terminate_spotdiff = {
-        timeline: [spotdiff_termination_message_trial],
-        conditional_function: function(){
-          if ( problem == true ){
-            return true
-          } else { return false }
-        }
-      };
-      timeline.push(if_node_terminate_spotdiff);
+    // conditional timeline for termination message
+    var if_node_terminate_spotdiff = {
+      timeline: [spotdiff_termination_message_trial],
+      conditional_function: function(){
+        if ( problem == true ){
+          return true
+        } else { return false }
+      }
+    };
+    timeline.push(if_node_terminate_spotdiff);
 
 
     jatos.onLoad(() => {
