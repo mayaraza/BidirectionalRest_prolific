@@ -18,7 +18,7 @@
     <script src="jspsych-7.3.0/plugin-html-button-response.js"></script>
     <script src="jspsych-7.3.0/plugin-psychophysics-modified.js"></script>
     <script src="jspsych-7.3.0/plugin-preload.js"></script>
-
+    <script src="jspsych-7.3.0/plugin-fullscreen.js"></script>
     <link href="jspsych-7.3.0/jspsych.css" rel="stylesheet" type="text/css" />
   </head>
 
@@ -175,7 +175,12 @@
       };
       timeline.push(set_stim_TFD);
 
-
+      // Make task full screen
+      var enter_fullscreen = {
+        type: jsPsychFullscreen,
+        fullscreen_mode: true
+      };
+      timeline.push(enter_fullscreen);
 
       // DEFINE TRIAL
       
@@ -302,7 +307,13 @@
       timeline.push(TFD_trial);
 
       
-
+    // Exit fullscreen
+    var exit_fullscreen = {
+      type: jsPsychFullscreen,
+      fullscreen_mode: false,
+      delay_after: 0
+    };
+    timeline.push(exit_fullscreen);
 
 
 

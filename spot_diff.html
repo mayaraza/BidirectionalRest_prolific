@@ -12,11 +12,12 @@
     <script src="jspsych-7.3.0/plugin-html-keyboard-response.js"></script>
     <script src="jspsych-7.3.0/extension-mouse-tracking.js"></script>
     <script src="jspsych-7.3.0/plugin-preload.js"></script>
+    <script src="jspsych-7.3.0/plugin-fullscreen.js"></script>
     <script src="stimuli.js"></script>
     <link href="jspsych-7.3.0/jspsych.css" rel="stylesheet" type="text/css" />
   </head>
   <style>
-      
+
     .banner {
     position: fixed;
     width: 100%;
@@ -143,6 +144,8 @@
         "<div>"+
         "<p>Insert instructions reminder</p>"+
         "<br><br>"+
+        "<p>This experiment will run in full screen mode. Please do not exit full screen during the task as this may affect how your responses are recorded.</p>"+
+        "<br><br>"+
         "</div>"
       },
       choices: ['Begin'],
@@ -154,6 +157,14 @@
       }
     };
     timeline.push(spotdiff_instruct_reminder);
+
+
+    // Make task full screen
+    var enter_fullscreen = {
+      type: jsPsychFullscreen,
+      fullscreen_mode: true
+    };
+    timeline.push(enter_fullscreen);
 
 
     // Displays image pairs, records mouse clicks, runs for given length of time
@@ -200,6 +211,7 @@
       }
 	  };
 
+
     // Timeline for trials
     var spot_diff_procedure = {
       timeline: [image_trial],
@@ -209,11 +221,21 @@
     timeline.push(spot_diff_procedure);
 
 
+    // Exit fullscreen
+    var exit_fullscreen = {
+      type: jsPsychFullscreen,
+      fullscreen_mode: false,
+      delay_after: 0
+    };
+    timeline.push(exit_fullscreen);
+
+
     // Check performance for termination
     var data_calc = {
       type: jsPsychHtmlKeyboardResponse,
-      stimulus: 'Pause',
-      choices: [' '],
+      stimulus: '',
+      choices: "NO_KEYS",
+      trial_duration: 1,
       on_start: function(data){
 
         // Line below not working but might be fine as mousetracking extension not used in subsequent scripts so might cancel listener?
