@@ -98,7 +98,7 @@
           "<div class='information-header'><h1> Instructions </h1></div>" + 
           "<br><hr>" +
           "<div class='information-body'><p>" +
-          'Once the session has begun, avoid clicking off the experiment screen as this may affect how your responses are recorded and could lead to your involvement being terminated.'+
+          'All tasks will run in full screen mode. Please do not exit full screen mode or click off the experiment screen once the session has begun, as this may affect how your responses are recorded and could lead to your involvement being terminated.'+
           '<br><br>'+
           "</p></div><hr>",
 
@@ -115,21 +115,6 @@
         allow_backward: true
       };
       timeline.push(overall_instruct);
-
-
-
-      // Full screen plugin doesn't seem to work bc it reverts to non-full screen when the component ends
-      var enter_full_screen = {
-        type: jsPsychFullscreen,
-        fullscreen_mode: true,
-        message: "<div class='information-header'><h1> Instructions </h1></div>" + 
-          "<br><hr>" +
-          "<div class='information-body'><p>" +
-          "Please enter full screen mode for the remainder of the session."+
-          "<br></p></div><hr>",
-        button_label: ['Full Screen']
-      };
-      //timeline.push(enter_full_screen);
       
 
 

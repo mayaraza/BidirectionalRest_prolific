@@ -101,9 +101,6 @@
       };
 
 
-
-
-
       // PRELOAD SOUNDS
 
       // put preload before instruction reminder so that if it takes a long time then pps will not miss the start of the task
@@ -122,11 +119,11 @@
 
 
 
-      // REMINDER OF INSTRUCTIONS
-
-      var TFD_reminder = {
-        type: jsPsychHtmlKeyboardResponse,
-        stimulus: "<div class='information-header'><h1> Relaxation Task </h1></div>" + 
+      // REMINDER OF INSTRUCTIONS and full screen mode
+      var instruct_fullscreen = {
+        type: jsPsychFullscreen,
+        fullscreen_mode: true,
+        message:  "<div class='information-header'><h1> Relaxation Task </h1></div>" + 
           "<br><hr>" +
           "<div class='information-body'><p>"+
           'Relax.'+
@@ -138,11 +135,10 @@
           'This task will last 5 mins. Please do not multi-task.'+
           '<br>'+
           '<br>'+
-          'Press the space bar to begin.'+
+          'Click to begin and enter full screen mode.'+
           "</p></div><hr>",
-        choices: [' '],
       };
-      timeline.push(TFD_reminder);
+      timeline.push(instruct_fullscreen);
 
 
       // testing variables
@@ -175,12 +171,6 @@
       };
       timeline.push(set_stim_TFD);
 
-      // Make task full screen
-      var enter_fullscreen = {
-        type: jsPsychFullscreen,
-        fullscreen_mode: true
-      };
-      timeline.push(enter_fullscreen);
 
       // DEFINE TRIAL
       
@@ -306,16 +296,6 @@
       };
       timeline.push(TFD_trial);
 
-      
-    // Exit fullscreen
-    var exit_fullscreen = {
-      type: jsPsychFullscreen,
-      fullscreen_mode: false,
-      delay_after: 0
-    };
-    timeline.push(exit_fullscreen);
-
-
 
       // get data from last trial
       var data_calc = {
@@ -436,6 +416,14 @@
       };
       timeline.push(blank_ITI);
 
+
+      // Exit fullscreen
+      var exit_fullscreen = {
+        type: jsPsychFullscreen,
+        fullscreen_mode: false,
+        delay_after: 0
+      };
+      timeline.push(exit_fullscreen);
 
 
       // OR jatos

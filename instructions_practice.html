@@ -95,6 +95,25 @@
       };
 
 
+      // Full screen - used throughout for practice trials
+      var enter_fullscreen = {
+        type: jsPsychFullscreen,
+        fullscreen_mode: true,
+        message:  "<div class='information-header'><h1> Practice </h1></div>" + 
+          "<br><hr>" +
+          "<div class='information-body'><p>"+
+          'Ready to practice? Click to begin in full screen mode.'+
+          '<br><br>'+
+          "</p></div><hr>",
+      };
+
+      // Exit fullscreen - used throughout
+      var exit_fullscreen = {
+        type: jsPsychFullscreen,
+        fullscreen_mode: false,
+        delay_after: 0
+      };
+
 
       var general_TFD_instruct = {
         type: jsPsychInstructions,
@@ -165,22 +184,13 @@
           "Press the space bar when you hear a piano note or see the cross change colour." +
           "<br><br>"+
           "This task will last 5 mins. Please do not multi-task." +
-          "</p></div><hr>",
-
-
-          // Ready to practice?
-          "<div class='information-header'><h1> Relaxation Task </h1></div>" + 
-          "<br><hr>" +
-          "<div class='information-body'><p>" +
-          "Ready to practice?"+
-          "</p></div><hr>",
+          "</p></div><hr>"
 
         ],
         show_clickable_nav: true,
         allow_backward: true
       };
       timeline.push(general_TFD_instruct);
-
 
 
       // Relaxation task practice trial
@@ -193,6 +203,8 @@
         message: '<div><p>The experiment is loading. This may take up to 30 seconds. Please do not refresh.</p></div>'
       };
       timeline.push(TFD_preload);
+
+      timeline.push(enter_fullscreen);
 
       // Relaxation task practice trial
       var TFD_prac = {
@@ -259,6 +271,8 @@
       };
       timeline.push(TFD_prac);
 
+      timeline.push(exit_fullscreen);
+
 
       // Spot the difference task instruction pages
       var spotdiff_instruct = {
@@ -277,10 +291,39 @@
           "<div class='information-body'><p>" +
           "This task involves a game of spot-the-difference. Your task is to study pairs of images to find differences between them."+
           "<br><br>"+
-          "There will be 7-9 differences between each image pair. Some of them may be hard to notice - study them as hard as you can." +
+          "There will be 7-9 differences between each image pair. Some of them may be hard to notice - study them as hard as you can. You will have 1 minute per pair." +
+          "<br><br>"+
+          "Click on the differences in the image displayed on the <b>left<b/>." +
           "</p></div><hr>",
 
-          /// MORE instructions here...
+          // Spotdiff detailed - pg2
+          "<div class='information-header'><h1> Spot-the-difference Task </h1></div>" + 
+          "<br><hr>" +
+          "<div class='information-body'><p>" +
+          "example here.."+
+          "<br><br>"+
+          "" +
+          "</p></div><hr>",
+
+          // Spotdiff detailed - pg3
+          "<div class='information-header'><h1> Spot-the-difference Task </h1></div>" + 
+          "<br><hr>" +
+          "<div class='information-body'><p>" +
+          "Your clicks will be recorded to measure your performance, so make sure to click in the <b>left hand image</b> and <b>only click when you find a difference</b>."+
+          "<br><br>"+
+          "If your pattern of clicks suggests you are not paying attention or following instructions, your involvement in the experiment may be terminated." +
+          "</p></div><hr>",
+
+          // Spotdiff detailed - pg4
+          "<div class='information-header'><h1> Spot-the-difference Task </h1></div>" + 
+          "<br><hr>" +
+          "<div class='information-body'><p>" +
+          "<i>You will see the header above and the following reminder before this task:</i>"+
+          "<br><br>"+
+          "Click on the differences in the <b>left</b> image. Only click when you find a difference." +
+          "<br><br>"+
+          "This task will last 5 mins. Please try as hard as you can." +
+          "</p></div><hr>"
 
         ],
         show_clickable_nav: true,
@@ -288,9 +331,20 @@
       };
       timeline.push(spotdiff_instruct);
 
+      timeline.push(enter_fullscreen);
+
 
       // INSERT SPOTDIFF PRACTICE
 
+      // BELOW are the instructions andrea wrote:
+      // stimulus: "<img src='img/memorability.jpg' width='30%' /><h2> Spot-the-Difference task </h2><hr><br>" +
+      //       "<p> Excellent! This is the end of the first phase of the experiment. </p>" +
+      //       "<p> You will now complete a Spot-the-Difference task.</p>" +
+      //       "<p> You will see two images side by side. Take a moment to carefully examine both images. Pay close attention to details such as shapes, colors, patterns, and objects in the images. Mark any differences you observe by using the mouse and click on it on the left-hand image. This can include variations in object positions, missing or added elements, or changes in color.</p>" +
+      //       "<p> You can only proceed to the next image after 1 minute by pressing the 'Done' button. The trial automatically advances after 2 minutes. <br> The whole task will take approximately 5-6 minutes to complete. </p><br><hr>"  +
+      //       "<p style='color:Blue;'><strong> Press the spacebar to begin </strong></p>",
+
+      timeline.push(exit_fullscreen);
 
 
 
@@ -343,19 +397,7 @@
       };
       timeline.push(encoding_instruct);
 
-      // Ready to practice?
-      var hover_trial = {
-        type: jsPsychHtmlKeyboardResponse,
-        stimulus: "<div class='information-header'><h1> Pleasantness Task </h1></div>" + 
-          "<br><hr>" +
-          "<div class='information-body'><p>" +
-          "Ready to practice?"+
-          '<br><br>'+
-          'Press the F or J key to begin.'+
-          "</p></div><hr>",
-          choices: ['f','j']
-      }
-      timeline.push(hover_trial);
+      timeline.push(enter_fullscreen);
 
       var practice_words = [
         { stim: "JUMP"},
@@ -402,8 +444,9 @@
       };
       timeline.push(encoding_prac);
 
+      timeline.push(exit_fullscreen);
 
-      //jsPsych.run(timeline);
+      
 
 // OR jatos
       jatos.onLoad(() => {

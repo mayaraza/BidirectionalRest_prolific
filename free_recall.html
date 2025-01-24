@@ -13,6 +13,7 @@
     <script src="jspsych-7.3.0/plugin-survey-text-modified.js"></script>
     <script src="jspsych-7.3.0/plugin-html-keyboard-response.js"></script>
     <script src="jspsych-7.3.0/plugin-html-button-response.js"></script>
+    <script src="jspsych-7.3.0/plugin-fullscreen.js"></script>
     <link href="jspsych-7.3.0/jspsych.css" rel="stylesheet" type="text/css" />
 
 
@@ -78,21 +79,25 @@
       };
       
 
-      // Instructions
-      var recall_instruct = {
-        type: jsPsychHtmlButtonResponse,
-        stimulus: function(){
-          return "<div class='banner'><h2>Memory Task</h2></div>" + // banner from CSS at top
+    // Instruction reminder and full screen
+    var instruct_fullscreen = {
+      type: jsPsychFullscreen,
+      fullscreen_mode: true,
+      message: function(){
+        return "<div class='banner'><h2>Memory Task</h2></div>" + // banner from CSS at top
           "<div>"+
-          "During this task, you must try to <b>remember words from the Pleasantness Task</b>, which you completed earlier."+
-          "<br><br>"+
-          "You will have 2 minutes to remember as many words as you can." + //", or press 'Done' when you can't remember any more words."+
-          "</p>"+
+          "<p>During this task, you must try to <b>remember words from the Pleasantness Task</b>, which you completed earlier.</p>"+
+          "<br>"+
+          "<p>You will have 2 minutes to remember as many words as you can.</p>" + //", or press 'Done' when you can't remember any more words."+
+          "<br>"+
+          "<p>Click to begin and enter full screen mode.</p>"
+          "<br>"+
           "</div>"
-        },
-        choices: ['Begin']
-      };
-      timeline.push(recall_instruct);
+      }
+    };
+    timeline.push(instruct_fullscreen);
+
+      
 
 
       // Text input box
@@ -110,8 +115,15 @@
       timeline.push(enter_trial);
 
 
+      // Exit fullscreen
+      var exit_fullscreen = {
+        type: jsPsychFullscreen,
+        fullscreen_mode: false,
+        delay_after: 0
+      };
+      timeline.push(exit_fullscreen);
 
-      //jsPsych.run(timeline);
+
 
 // OR jatos
       jatos.onLoad(() => {
