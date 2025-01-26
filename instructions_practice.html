@@ -22,6 +22,8 @@
     <script src="jspsych-7.3.0/plugin-instructions.js"></script>
     <script src="jspsych-7.3.0/plugin-preload.js"></script>
     <script src="jspsych-7.3.0/plugin-psychophysics-modified.js"></script>
+    <script src="jspsych-7.3.0/plugin-fullscreen.js"></script>
+    <script src="jspsych-7.3.0/extension-mouse-tracking.js"></script>
     <link href="jspsych-7.3.0/jspsych.css" rel="stylesheet" type="text/css" />
     <link rel="stylesheet" href="banner.css">
   </head>
@@ -50,6 +52,26 @@
 			color: black;
 		}
 
+    .imagepos {position: absolute; top: 0px; left: 0px;} /*mouse tracking is relative to top left of screen, so this ensure image is presented on top left, therefore tracked clicks will be essentially relative to the image (hopefully)*/
+    .button {position: absolute; top: 780px; left: 10px;} /*sets position of button so it is visible with the larger images*/
+    .prompt {position: absolute; top: 750px; left: 10px;}
+
+    .banner {
+      position: fixed;
+      width: 100%;
+      top: 0;
+      left: 0;
+      color: White;
+      background-color: gray;
+      text-align: center;
+      font-weight: bold;
+      font-size: 1.17em;
+      }
+
+      .stim {
+      font-size:40px;
+      }
+
 	</style>
 
   <body></body>
@@ -68,31 +90,7 @@
       var timeline = [];
       var PPID;
 
-      // Function to change the background colour upon response in the encoding task
-      function change_background(e) {
-          if(e.keyCode == 70 || e.keyCode == 74) { // numbers refer to the F or J keys
-            document.body.style.backgroundColor = '#BFBFBF' // change color as needed
 
-            // Code below times the colour change out
-              // setTimeout(function () {
-              //   document.body.style.backgroundColor = '#FFFFFF'
-              // }, 500) // change duration as needed
-          }
-      };
-
-
-      // Function to briefly change background colour when response is detected during the relaxation task
-      function keypress_detected(info){
-        var canvasElement = document.getElementById("myCanvas");
-
-        // Change the colour
-        canvasElement.style.backgroundColor = "#b4b4b4"; // change to dark grey
-
-        // Revert the color back to green after 200ms
-        setTimeout(function() {
-          canvasElement.style.backgroundColor = "#c8c8c8"; // go back to light grey
-        }, 300);
-      };
 
 
       // Full screen - used throughout for practice trials
@@ -112,6 +110,29 @@
         type: jsPsychFullscreen,
         fullscreen_mode: false,
         delay_after: 0
+      };
+
+
+
+
+
+
+
+
+      // Relaxation / TFD ----------------------------------------------------------------------
+
+
+      // Function to briefly change background colour when response is detected during the relaxation task
+      function keypress_detected_TFD(info){
+        var canvasElement = document.getElementById("myCanvas");
+
+        // Change the colour
+        canvasElement.style.backgroundColor = "#b4b4b4"; // change to dark grey
+
+        // Revert the color back to green after 200ms
+        setTimeout(function() {
+          canvasElement.style.backgroundColor = "#c8c8c8"; // go back to light grey
+        }, 300);
       };
 
 
@@ -144,7 +165,7 @@
           "<div class='information-header'><h1> Instructions </h1></div>" + 
           "<br><hr>" +
           "<div class='information-body'>" +
-          "<p>You will now read instructions for 3 subsequent tasks. The order in which you will complete these tasks depends on the condition you have been assigned to." +
+          "<p>You will now read instructions for 3 subsequent tasks. The order of these tasks depends on the condition you have been assigned to." +
           "<br><br>"+
           "</div><hr>",
           
@@ -261,7 +282,7 @@
         response_ends_trial: false,
         on_start : function(){ // set listener to detect key presses
           jsPsych.pluginAPI.getKeyboardResponse({
-              callback_function: keypress_detected,
+              callback_function: keypress_detected_TFD,
               valid_responses : [" "],
               rt_method: "performance",
               persist: true
@@ -273,6 +294,42 @@
 
       timeline.push(exit_fullscreen);
 
+
+
+
+
+
+
+
+
+
+      // Spot Diff ----------------------------------------------------------------------
+
+      // Function to change the background colour of screen so pps know when their responses have been recorded
+      // Invoked as part of jspsych's event listeners
+      function change_background_spotdiff(e) {
+          if(e.button == 0) { // 0 refers to left mouse click
+            document.body.style.backgroundColor = '#BFBFBF' // change color as needed
+
+            // Code below times the colour change out
+              setTimeout(function () {
+                document.body.style.backgroundColor = '#FFFFFF' // change back to white
+              }, 300) // change duration as needed
+          }
+      };
+
+      // Example spot diff
+      var spot_diff_instruct_imgs = [
+        './stimuli/instruct_stim/charcuterie.jpg',
+        './stimuli/instruct_stim/charcuterie_solution.jpg',
+      ];
+
+      // Preload images for use in the question instructions
+      var img_preload = {
+        type: jsPsychPreload,
+        images: spot_diff_instruct_imgs
+      };
+      timeline.push(img_preload);
 
       // Spot the difference task instruction pages
       var spotdiff_instruct = {
@@ -291,21 +348,32 @@
           "<div class='information-body'><p>" +
           "This task involves a game of spot-the-difference. Your task is to study pairs of images to find differences between them."+
           "<br><br>"+
-          "There will be 7-9 differences between each image pair. Some of them may be hard to notice - study them as hard as you can. You will have 1 minute per pair." +
+          "Some differences may be hard to notice - study the images as hard as you can. You will have 1 minute per pair." +
           "<br><br>"+
           "Click on the differences in the image displayed on the <b>left<b/>." +
           "</p></div><hr>",
 
           // Spotdiff detailed - pg2
           "<div class='information-header'><h1> Spot-the-difference Task </h1></div>" + 
-          "<br><hr>" +
+          "<br>" +
           "<div class='information-body'><p>" +
-          "example here.."+
+          "So, for example, you may see this image pair..."+
           "<br><br>"+
-          "" +
+          "<img src='"+ spot_diff_instruct_imgs[0] +"'width='700px'>"+
+          "<br><br>"+
           "</p></div><hr>",
 
           // Spotdiff detailed - pg3
+          "<div class='information-header'><h1> Spot-the-difference Task </h1></div>" + 
+          "<br>" +
+          "<div class='information-body'><p>" +
+          "Here are the differences..."+
+          "<br><br>"+
+          "<img src='"+ spot_diff_instruct_imgs[1] +"'width='700px'>"+
+          "<br><br>"+
+          "</p></div><hr>",
+
+          // Spotdiff detailed - pg4
           "<div class='information-header'><h1> Spot-the-difference Task </h1></div>" + 
           "<br><hr>" +
           "<div class='information-body'><p>" +
@@ -314,7 +382,7 @@
           "If your pattern of clicks suggests you are not paying attention or following instructions, your involvement in the experiment may be terminated." +
           "</p></div><hr>",
 
-          // Spotdiff detailed - pg4
+          // Spotdiff detailed - pg5
           "<div class='information-header'><h1> Spot-the-difference Task </h1></div>" + 
           "<br><hr>" +
           "<div class='information-body'><p>" +
@@ -334,19 +402,52 @@
       timeline.push(enter_fullscreen);
 
 
-      // INSERT SPOTDIFF PRACTICE
+      // Single spot diff practice trial
+      var spot_diff_prac_trial = {
+        type: jsPsychHtmlKeyboardResponse,
+        stimulus: function(){ return "<div class='imagepos'><img src="+spot_diff_instruct_imgs[0]+"></div>"},
+        choices: "NO_KEYS",
+        prompt: function(){return '<div class="prompt">There are 6 differences here. Click on the left-hand image.</div>'},
+        trial_duration: 30000, //trial times out after 30s
+        data: {
+          task: 'spot_diff_prac' // each new trial will be marked in the jspsych data with 'image_trial'
+        },
+        // on_start: function (trial) {
+        //   document.addEventListener("mousedown", change_background_spotdiff);
+        // },
+        // extensions: [{ 
+        //       type: jsPsychExtensionMouseTracking, //track mouse clicks
+        //       params: { events: ['mousedown'] }
+        // }],
+        // on_finish: function(data){
+        //   document.removeEventListener("keydown", change_background_spotdiff);
 
-      // BELOW are the instructions andrea wrote:
-      // stimulus: "<img src='img/memorability.jpg' width='30%' /><h2> Spot-the-Difference task </h2><hr><br>" +
-      //       "<p> Excellent! This is the end of the first phase of the experiment. </p>" +
-      //       "<p> You will now complete a Spot-the-Difference task.</p>" +
-      //       "<p> You will see two images side by side. Take a moment to carefully examine both images. Pay close attention to details such as shapes, colors, patterns, and objects in the images. Mark any differences you observe by using the mouse and click on it on the left-hand image. This can include variations in object positions, missing or added elements, or changes in color.</p>" +
-      //       "<p> You can only proceed to the next image after 1 minute by pressing the 'Done' button. The trial automatically advances after 2 minutes. <br> The whole task will take approximately 5-6 minutes to complete. </p><br><hr>"  +
-      //       "<p style='color:Blue;'><strong> Press the spacebar to begin </strong></p>",
+        // }
+      };
+      timeline.push(spot_diff_prac_trial);
+
 
       timeline.push(exit_fullscreen);
 
 
+
+
+
+
+
+      // Encoding ----------------------------------------------------------------------
+      
+      // Function to change the background colour upon response in the encoding task
+      function change_background_encoding(e) {
+          if(e.keyCode == 70 || e.keyCode == 74) { // numbers refer to the F or J keys
+            document.body.style.backgroundColor = '#BFBFBF' // change color as needed
+
+            // Code below times the colour change out
+              // setTimeout(function () {
+              //   document.body.style.backgroundColor = '#FFFFFF'
+              // }, 500) // change duration as needed
+          }
+      };
 
       // Encoding task instruction pages
       var encoding_instruct = {
@@ -389,7 +490,6 @@
           "<br><br>"+
           "Does the word feel pleasant or unpleasant?"+
           "<br><br>"+
-          "Hover your forefingers over the F and J keys." +
           "</p></div><hr>",
         ],
         show_clickable_nav: true,
@@ -433,10 +533,10 @@
                 choices: ['f', 'j'],
                 trial_duration: 3000,
                 response_ends_trial: false,
-                on_start: function(){ document.addEventListener("keydown", change_background) },
+                on_start: function(){ document.addEventListener("keydown", change_background_encoding) },
                 on_finish: function(){ 
                   document.body.style.backgroundColor = '#FFFFFF'
-                  document.removeEventListener("keydown", change_background) },
+                  document.removeEventListener("keydown", change_background_encoding) },
             }
           ],
           timeline_variables: practice_words,

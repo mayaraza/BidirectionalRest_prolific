@@ -98,7 +98,7 @@
         type: jsPsychPreload,
         images: instruct_imgs
       };
-      //timeline.push(img_preload);
+      timeline.push(img_preload);
 
       // Set the stimuli depending on expGrp
       var set_think = {
@@ -141,7 +141,7 @@
           "<div class='information-body'><p>" +
           'Now for some quick questions about the tasks you completed today:'+
           '<br><br>'+
-          //"<img src='"+ instruct_img +"'width='700px'>"+
+          "<img src='"+ task_flow_img +"'width='700px'>"+
           '<br><br>'+
           'Please note that you may not have completed all the tasks you received instructions for at the start of the experiment.'
           "</p></div><hr>"
@@ -156,7 +156,7 @@
         type: jsPsychSurveyMultiChoice,
         preamble: "<div><p style='width:700px'>"+
           "<br><br>"+
-          "The final task tested your memory for the words you saw earlier."+
+          "<h4>The final task tested your memory for the words you saw earlier.<h4>"+
           "<br><br>"+
           "</p></div>",
         questions: [
@@ -181,6 +181,7 @@
           "<br><br>"+
           "After the Pleasantness task, where you saw some words, you completed the "+ post_task + " task. During the "+ post_task +" task..."+ // set at the start of script depending upon day_num and exp_grp
           "<br><br>"+
+          "<img src='"+ task_flow_img +"'width='700px'>"+
           "</p></div>"
         },
         questions: [
@@ -245,11 +246,13 @@
       // Arousal Qs
       var arousal_Qs = {
         type: jsPsychSurveyLikert,
-        preamble: "<div><p style='width:700px'>"+
+        preamble: function(){return"<div><p style='width:700px'>"+
           "<br><br>"+
           "The following questions refer to the level of arousal you felt during the session. <b>Arousal refers to your general level of alertness, excitement or energy.</b>"+
           "<br><br>"+
-          "</p></div>",
+          "<img src='"+ task_flow_img +"'width='700px'>"+
+          "</p></div>"
+        },
         questions: [
           {
             prompt: "<div><h4>The Video Task</h4></div>",
@@ -325,11 +328,13 @@
       // Effort Qs
       var effort_Qs = {
         type: jsPsychSurveyLikert,
-        preamble: "<div><p style='width:700px'>"+
+        preamble: function(){return"<div><p style='width:700px'>"+
           "<br><br>"+
           "The following questions refer to how <b>effortful</b> you found each task e.g. an effortful task may feel like it required a lot of <b>'brain power', focus, attention or energy</b>."+
           "<br><br>"+
-          "</p></div>", // may need to go in a function?
+          "<img src='"+ task_flow_img +"'width='700px'>"+
+          "</p></div>"
+        },
         questions: [
           {
             prompt: "<div><h4>The Video Task</h4></div>",

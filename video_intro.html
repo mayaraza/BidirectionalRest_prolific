@@ -10,11 +10,13 @@
     <script src="jatos.js"></script>
     <script src="jspsych-7.3.0/jspsych.js"></script>
 <!-- load plugins here -->
+    <script src="stimuli.js"></script>
     <script src="jspsych-7.3.0/plugin-html-button-response.js"></script>
     <script src="jspsych-7.3.0/plugin-preload.js"></script>
     <script src="jspsych-7.3.0/plugin-html-slider-response.js"></script>
     <script src="jspsych-7.3.0/plugin-html-keyboard-response.js"></script>
-    <script src="jspsych-7.3.0/plugin-video-button-response.js"></script>
+    <script src="jspsych-7.3.0/plugin-video-keyboard-response.js"></script>
+    <script src="jspsych-7.3.0/plugin-fullscreen.js"></script>
     <link href="jspsych-7.3.0/jspsych.css" rel="stylesheet" type="text/css" />
   </head>
 
@@ -72,39 +74,39 @@
 
       };
 
+      // Video array loaded in stimuli sheet
 
-      // Preload images for use in the question instructions
-      // var vid_preload = {
-      //   type: jsPsychPreload,
-      //   images: instruct_imgs
-      // };
-      //timeline.push(vid_preload);
+      // Preload video
+      var vid_preload = {
+        type: jsPsychPreload,
+        video: video_array
+       };
+      timeline.push(vid_preload);
 
 
-      // Intro message
-      var video_instruct = {
-        type: jsPsychHtmlButtonResponse,
-        stimulus: function(){ return "<div class='information-header'><h1> Video Task </h1></div>"+
-          "<br><hr>" +
-          "<div class='information-body'><p>" +
-          'Instructions here'+
-          '<br><br>'+
-          'blah'
-          "</p></div><hr>"
-        },
-        choices: ['Begin']
+      // Instruction reminder and full screen
+      var instruct_fullscreen = {
+        type: jsPsychFullscreen,
+        fullscreen_mode: true,
+        message: function(){ return "<div class='information-header'><h1> Video Task </h1></div>"+
+            "<br><hr>" +
+            "<div class='information-body'><p>" +
+            'Now for the Video Task'+
+            '<br><br>'+
+            'Click to begin and enter full screen.'+
+            "</p></div><hr>"
+            }
       };
-      timeline.push(video_instruct);
+      timeline.push(instruct_fullscreen);
 
 
       // video trial
       var video_trial = {
-        type: jsPsychVideoButtonResponse,
-        stimulus: ['./stimuli/video_stim/drone_mountain_pexels.mp4'],
+        type: jsPsychVideoKeyboardResponse,
+        stimulus: video_array,
         width: 700,
-        margin_vertical: 10, // so that the button appears slightly lower
-        choices: ['Done'],
-        response_allowed_while_playing: false
+        choices: "NO_KEYS",
+        trial_ends_after_video: true
       };
       timeline.push(video_trial);
 
@@ -112,13 +114,23 @@
       // Ask pps to rate their feelings of pleasantness
       var feelings_Qs = {
         type: jsPsychHtmlSliderResponse,
-        stimulus: `<div style="width:700px;">
-            <p>Use the slider to rate how pleasant you feel after watching the video.</p>
+        stimulus: `<div style="width:700px;">+
+            <p>Use the slider to rate how pleasant you feel after watching the video.</p>+
+            '<br><br>'+
             </div>`,
         require_movement: true,
         labels: ['Very pleasant', 'Neutral', 'Very unpleasant']
       };
       timeline.push(feelings_Qs);
+
+
+      // Exit fullscreen
+      var exit_fullscreen = {
+        type: jsPsychFullscreen,
+        fullscreen_mode: false,
+        delay_after: 0
+      };
+      timeline.push(exit_fullscreen);
 
       
 // OR jatos

@@ -83,29 +83,29 @@
         type: jsPsychSurveyMultiChoice,
         questions: [
           {
-            prompt: "<div><h3>During the Relaxation Task, you must press the space bar...</h3></div>", 
+            prompt: "<div><h3>During the Relaxation Task, I must press the space bar...</h3></div>", 
             name: 'TFD_test_1', 
-            options: ['When you hear a piano note, see the cross change from red to black, or see the cross change from black to red.', 'Only when you hear a piano note.', 'Only when you see the cross change colour.'], 
+            options: ['When I hear a piano note, see the cross change from red to black, or see the cross change from black to red.', 'Only when I hear a piano note.', 'Only when I see the cross change colour.'], 
             required: true
           },
           {
-            prompt: "<div><h3>Regarding the Relaxation task,...</h3></div>", 
+            prompt: "<div><h3>Regarding the Relaxation task...</h3></div>", 
             name: 'TFD_test_2', 
             options: ['This is an opportunity to relax, so I can use my phone while I wait for it to end.', 'Despite being a simple task, I must remain focused on the screen and not multi-task.', 'I can open other browser tabs during this task, as long as I check the task screen every so often.'], 
             required: true
           },
           {
-            prompt: "<div><h3>During the Spot-the-difference Task, XXXX...</h3></div>", 
+            prompt: "<div><h3>During the Spot-the-difference Task, I must...</h3></div>", 
             name: 'spotdiff_test', 
-            options: ['XXXXX','XXXX', 'XXXXX'], 
+            options: ['Find differences between two images and click on the location of these in both images.','Find differences between two images and click on these in the left hand image only.', 'Click all over the images to ensure I locate all the differences.'], 
             required: true
           },
           {
             prompt: "<div><h3>During the Pleasantness Task, the goal is...</h3></div>", 
             name: 'encoding_test', 
-            options: ['To give your opinion on how pleasant you find each word - there are no correct answers.','To correctly guess how pleasant most people find each word.'], 
+            options: ['To give my opinion on how pleasant I find each word - there are no correct answers.','To correctly guess how pleasant most people find each word.'], 
             required: true
-          },
+          }
         ],
         on_finish: function(data){
           // log one attempt in the batch session data
@@ -116,10 +116,10 @@
           // Check whether all the responses are correct, if any are incorrect make problem 1
           // I had to use stringify to make the comparison work
           if (JSON.stringify(data.response) == JSON.stringify({
-                                                                TFD_test_1: 'When you hear a piano note, see the cross change from red to black, or see the cross change from black to red.', 
+                                                                TFD_test_1: 'When I hear a piano note, see the cross change from red to black, or see the cross change from black to red.', 
                                                                 TFD_test_2: 'Despite being a simple task, I must remain focused on the screen and not multi-task.', 
-                                                                spotdiff_test: 'XXXXX',
-                                                                encoding_test: 'To give your opinion on how pleasant you find each word - there are no correct answers.', 
+                                                                spotdiff_test: 'Find differences between two images and click on these in the left hand image only.',
+                                                                encoding_test: 'To give my opinion on how pleasant I find each word - there are no correct answers.', 
                                                               })){
             problem = 0 ;
           } else {
