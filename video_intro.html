@@ -79,7 +79,8 @@
       // Preload video
       var vid_preload = {
         type: jsPsychPreload,
-        video: video_array
+        video: function(){ return video_array.map(item => item.video_stim[0]);}, // returns just the filepaths from the stimulus array
+        message: '<div><p>The experiment is loading. This may take up to 30 seconds. Please do not refresh.</p></div>'
        };
       timeline.push(vid_preload);
 
@@ -100,24 +101,27 @@
       timeline.push(instruct_fullscreen);
 
 
-      // video trial
-      var video_trial = {
-        type: jsPsychVideoKeyboardResponse,
-        stimulus: video_array,
-        width: 700,
-        choices: "NO_KEYS",
-        trial_ends_after_video: true
+      // video trials
+      var video_procedure = {
+        timeline: [{
+          type: jsPsychVideoKeyboardResponse,
+          stimulus: jsPsych.timelineVariable('video_stim'),
+          width: 700,
+          choices: "NO_KEYS",
+          trial_ends_after_video: true
+      }],
+      timeline_variables: video_array // from stimuli.js
       };
-      timeline.push(video_trial);
+      timeline.push(video_procedure);
 
 
       // Ask pps to rate their feelings of pleasantness
       var feelings_Qs = {
         type: jsPsychHtmlSliderResponse,
-        stimulus: `<div style="width:700px;">+
-            <p>Use the slider to rate how pleasant you feel after watching the video.</p>+
+        stimulus: '<div style="width:700px;">'+
+            '<p>Use the slider to rate how pleasant you feel after watching the video.</p>'+
             '<br><br>'+
-            </div>`,
+            '</div>',
         require_movement: true,
         labels: ['Very pleasant', 'Neutral', 'Very unpleasant']
       };

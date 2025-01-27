@@ -1,6 +1,12 @@
 
 // For intro video task
-var video_array = ['./stimuli/video_stim/drone_mountain_pexels.mp4']
+var video_array = [
+    { video_stim: ['./stimuli/video_stim/flowers1.mp4']},
+    { video_stim: ['./stimuli/video_stim/flowers2.mp4']},
+    { video_stim: ['./stimuli/video_stim/flowers3.mp4']},
+    { video_stim: ['./stimuli/video_stim/flowers4.mp4']},
+    { video_stim: ['./stimuli/video_stim/flowers5.mp4']}
+];
 
 // Word stimuli for encoding task
 var master_word_stim = [
