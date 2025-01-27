@@ -1,4 +1,5 @@
 
+
 // For intro video task
 var video_array = [
     { video_stim: ['./stimuli/video_stim/flowers1.mp4']},
@@ -85,27 +86,26 @@ var master_word_stim = [
 
 // Image pairs for spot the difference task - these were sources from Readers' Digest
 var spot_diff_stim_array = [
-    //{img: '<div class="imagepos"><img src= "spotdiffpic1.png"></div>'},
-    {img_distractor: '<div class="imagepos"><img src= "stimuli/spot_diff_stim/balloons.jpg"></div>', num_diff: 8},
-    {img_distractor: '<div class="imagepos"><img src= "stimuli/spot_diff_stim/beach.jpg"></div>', num_diff: 7},
-    {img_distractor: '<div class="imagepos"><img src= "stimuli/spot_diff_stim/bikes.jpg"></div>', num_diff: 5},
-    {img_distractor: '<div class="imagepos"><img src= "stimuli/spot_diff_stim/breakfast.jpg"></div>', num_diff: 6},
-    {img_distractor: '<div class="imagepos"><img src= "stimuli/spot_diff_stim/cafe.jpg"></div>', num_diff: 6},
-    {img_distractor: '<div class="imagepos"><img src= "stimuli/spot_diff_stim/cakes.jpg"></div>', num_diff: 7},
-    {img_distractor: '<div class="imagepos"><img src= "stimuli/spot_diff_stim/donuts.jpg"></div>', num_diff: 7},
-    {img_distractor: '<div class="imagepos"><img src= "stimuli/spot_diff_stim/flowers.jpg"></div>', num_diff: 4},
-    {img_distractor: '<div class="imagepos"><img src= "stimuli/spot_diff_stim/lavender.jpg"></div>', num_diff: 7},
-    {img_distractor: '<div class="imagepos"><img src= "stimuli/spot_diff_stim/omelette.jpg"></div>', num_diff: 7},
-    {img_distractor: '<div class="imagepos"><img src= "stimuli/spot_diff_stim/ornaments.jpg"></div>', num_diff: 7},
-    {img_distractor: '<div class="imagepos"><img src= "stimuli/spot_diff_stim/popcorn.jpg"></div>', num_diff: 7},
-    {img_distractor: '<div class="imagepos"><img src= "stimuli/spot_diff_stim/runners.jpg"></div>', num_diff: 6},
-    {img_distractor: '<div class="imagepos"><img src= "stimuli/spot_diff_stim/salad.jpg"></div>', num_diff: 7},
-    {img_distractor: '<div class="imagepos"><img src= "stimuli/spot_diff_stim/shoes.jpg"></div>', num_diff: 6},
-    {img_distractor: '<div class="imagepos"><img src= "stimuli/spot_diff_stim/soap.jpg"></div>', num_diff: 8},
-    {img_distractor: '<div class="imagepos"><img src= "stimuli/spot_diff_stim/stationery.jpg"></div>', num_diff: 5},
-    {img_distractor: '<div class="imagepos"><img src= "stimuli/spot_diff_stim/sushi.jpg"></div>', num_diff: 9},
-    {img_distractor: '<div class="imagepos"><img src= "stimuli/spot_diff_stim/traffic.jpg"></div>', num_diff: 7},
-    {img_distractor: '<div class="imagepos"><img src= "stimuli/spot_diff_stim/yellow.jpg"></div>', num_diff: 7}
+    {img_distractor: "./stimuli/spot_diff_stim/balloons.jpg", num_diff: 8},
+    {img_distractor: "./stimuli/spot_diff_stim/beach.jpg", num_diff: 7},
+    {img_distractor:  "./stimuli/spot_diff_stim/bikes.jpg", num_diff: 5},
+    {img_distractor:  "./stimuli/spot_diff_stim/breakfast.jpg", num_diff: 6},
+    {img_distractor:  "./stimuli/spot_diff_stim/cafe.jpg", num_diff: 6},
+    {img_distractor:  "./stimuli/spot_diff_stim/cakes.jpg", num_diff: 7},
+    {img_distractor:  "./stimuli/spot_diff_stim/donuts.jpg", num_diff: 7},
+    {img_distractor:  "./stimuli/spot_diff_stim/flowers.jpg", num_diff: 4},
+    {img_distractor:  "./stimuli/spot_diff_stim/lavender.jpg", num_diff: 7},
+    {img_distractor:  "./stimuli/spot_diff_stim/omelette.jpg", num_diff: 7},
+    {img_distractor:  "./stimuli/spot_diff_stim/ornaments.jpg", num_diff: 7},
+    {img_distractor:  "./stimuli/spot_diff_stim/popcorn.jpg", num_diff: 7},
+    {img_distractor:  "./stimuli/spot_diff_stim/runners.jpg", num_diff: 6},
+    {img_distractor:  "./stimuli/spot_diff_stim/salad.jpg", num_diff: 7},
+    {img_distractor:  "./stimuli/spot_diff_stim/shoes.jpg", num_diff: 6},
+    {img_distractor:  "./stimuli/spot_diff_stim/soap.jpg", num_diff: 8},
+    {img_distractor:  "./stimuli/spot_diff_stim/stationery.jpg", num_diff: 5},
+    {img_distractor:  "./stimuli/spot_diff_stim/sushi.jpg", num_diff: 9},
+    {img_distractor:  "./stimuli/spot_diff_stim/traffic.jpg", num_diff: 7},
+    {img_distractor:  "./stimuli/spot_diff_stim/yellow.jpg", num_diff: 7}
 ];
 
 
@@ -132,3 +132,10 @@ var TFD_stim_arr = [
     }
     ];
 
+    // Images of the task flow for use in post_Qs
+    var instruct_imgs = [
+    './stimuli/RR_img.jpg',
+    './stimuli/RE_img.jpg',
+    './stimuli/ER_img.jpg',
+    './stimuli/EE_img.jpg'
+    ];

@@ -1,0 +1,69 @@
+<!-- <!DOCTYPE html> -->
+<html>
+  <head>
+    <title>Experiment</title>
+
+    <!-- This script instructs pps to think back to the last encoding task and report as many words as they can remember in 2 minutes. -->
+  
+
+    <script src="jatos.js"></script>
+    <script src="jspsych-7.3.0/jspsych.js"></script>
+<!-- load plugins here -->
+
+    <script src="jspsych-7.3.0/plugin-preload.js"></script>
+    <script src="stimuli.js"></script>
+    <link href="jspsych-7.3.0/jspsych.css" rel="stylesheet" type="text/css" />
+
+
+  </head>
+
+  <style>
+      
+    .banner {
+    position: fixed;
+    width: 100%;
+    top: 0;
+    left: 0;
+    color: White;
+    background-color: gray;
+    text-align: center;
+    font-weight: bold;
+    font-size: 1.17em;
+    }
+
+  </style>
+
+  <body></body>
+  <script>
+
+      var jsPsych = initJsPsych({
+        experiment_width: 700,
+    		on_finish: function () {
+    			jatos.startNextComponent()
+    		}
+    	});
+
+      var timeline = [];
+
+
+
+      var stim_preload = {
+        type: jsPsychPreload,
+        images: function(){return spot_diff_stim_array.map(item => item.img_distractor)}, // returns just the filepaths from the stimulus array,
+        video: function(){ return video_array.map(item => item.video_stim[0]);}, 
+        audio: function(){return TFD_stim_arr.map(function (stim) { return stim.sound_file });},
+        message: '<div><p>The experiment is loading. This may take up to 2 minutes. Please do not refresh.</p></div>',
+        max_load_time: 120000
+      };
+      timeline.push(stim_preload);
+
+
+
+// OR jatos
+      jatos.onLoad(() => {
+        console.log('preload start');
+        jsPsych.run(timeline);
+      });
+
+</script>
+</html>

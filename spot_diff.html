@@ -137,7 +137,8 @@
     // Preload images
     var spot_diff_preload = {
       type: jsPsychPreload,
-      auto_preload: true
+      images: function(){return spot_diff_stim_array.map(item => item.img_distractor)},
+      message: '<div><p>The experiment is loading. This may take up to 30 seconds. Please do not refresh.</p></div>'
       };
       timeline.push(spot_diff_preload);
 
@@ -172,7 +173,7 @@
     var image_trial = {
       type: jsPsychHtmlButtonResponse,
       button_html: '<button class="jspsych-btn button";>%choice%</button>', //positions button so it is visible behind image
-	    stimulus: jsPsych.timelineVariable('img_distractor'),
+	    stimulus: function(){return '<div class="imagepos"><img src= ' + jsPsych.timelineVariable('img_distractor') + '></div>'},
       prompt: function(){return '<div class="prompt">There are ' + jsPsych.timelineVariable('num_diff') + ' differences here. Click on the left-hand image.</div>'},
       choices: ['Next'],
       trial_duration: 10000, //trial times out after 1 min
