@@ -85,14 +85,16 @@
       fullscreen_mode: true,
       message: function(){
         return "<div class='banner'><h2>Memory Task</h2></div>" + // banner from CSS at top
-          "<div><hr>"+
-          "<p>During this task, you must try to <b>remember words from the Pleasantness Task</b>, which you completed earlier.</p>"+
-          "<br>"+
-          "<p>You will have 2 minutes to remember as many words as you can.</p>" + //", or press 'Done' when you can't remember any more words."+
-          "<br>"+
-          "<p>Click to begin and enter full screen mode.</p>"
-          "<br>"+
-          "</div><hr>"
+        "<br><hr>" +    
+        "<div>"+
+        "<br>"+
+        "<p>During this task, you must try to <b>remember words from the Pleasantness Task</b>, which you completed earlier.</p>"+
+        "<br>"+
+        "<p>You will have 2 minutes to remember as many words as you can.</p>" +
+        "<br>"+
+        "<p>Click to begin and enter full screen mode.</p>"+
+        "<br><br>"+
+        "</div><hr>"
       }
     };
     timeline.push(instruct_fullscreen);
