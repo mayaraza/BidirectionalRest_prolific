@@ -177,11 +177,11 @@
 
       var comprehension_problem = {
         type: jsPsychHtmlButtonResponse,
-        stimulus: "<div><p style ='width:700px'>It is very important for our research that you fully understand the instructions before beginning the experiment. Please contact the experimenter so we can explain / answer any questions. Then you can continue with the experiment. This page should redirect you to Prolific when you press 'Exit'. Copy the completion code 'C1LEQHRN' just in case.</p></div>",
+        stimulus: "<div><p style ='width:700px'>It is very important for our research that you fully understand the instructions before beginning the experiment. Please contact the experimenter so we can explain / answer any questions. Then you can continue with the experiment. This page should redirect you to Prolific when you press 'Exit'. Copy the completion code 'C1AVPTLD' just in case.</p></div>",
         choices: ['Exit'],
         on_finish: function(){
           jatos.submitResultData(jsPsych.data.get().json());
-          jatos.endStudyAndRedirect("https://app.prolific.com/submissions/complete?cc=C1LEQHRN"); // Should redirect and save pp to failed comprehension check group
+          jatos.endStudyAndRedirect("https://app.prolific.com/submissions/complete?cc=C1AVPTLD"); // Should redirect and save pp to failed comprehension check group
         }
       };
       // Not added to timeline bc this is conditional

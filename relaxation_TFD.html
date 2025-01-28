@@ -344,21 +344,21 @@
             console.log('terminate no resp');
             problem = true;
             termination_message_stim = '<div><h1>Your involvement has been terminated.</h1>'+
-              '<p style="width:700px">You did not make any responses to this task. This page should redirect you to Prolific when you click "Exit". Copy the completion code "CHVB4HI7".</p><br>'+
+              '<p style="width:700px">You did not make any responses to this task. This page should redirect you to Prolific when you click "Exit". Copy the completion code "CO9YSVGI".</p><br>'+
               '</div>'
           } else if (score < event_times.length * 0.7){ // PREFORMANCE LESS THAN 70%
             // terminate
             console.log('terminate performane < 70');
             problem = true;
             termination_message_stim = '<div><h1>Your involvement has been terminated.</h1>'+
-              '<p style="width:700px">Our research depends upon participants being engaged and concentrating. Your performance on this task suggests you were not engaged and concentrating. This page should redirect you to Prolific when you click "Exit". Copy the completion code "CHVB4HI7".</p><br>'+
+              '<p style="width:700px">Our research depends upon participants being engaged and concentrating. Your performance on this task suggests you were not engaged and concentrating. This page should redirect you to Prolific when you click "Exit". Copy the completion code "CO9YSVGI".</p><br>'+
               '</div>'
           } else if ( missedResponses.length > event_times.length * 1.7 ){ // MADE 70% MORE RESPONSES THAN REQUIRED e.g. pressing space bar throughout whole task
             // terminate
             console.log('terminate too many resp');
             problem = true;
             termination_message_stim = '<div><h1>Your involvement has been terminated.</h1>'+
-              '<p style="width:700px">Our research depends upon participants being engaged and concentrating. Your pattern of responses on this task suggests you were not engaged and concentrating. This page should redirect you to Prolific when you click "Exit". Copy the completion code "CHVB4HI7".</p><br>'+
+              '<p style="width:700px">Our research depends upon participants being engaged and concentrating. Your pattern of responses on this task suggests you were not engaged and concentrating. This page should redirect you to Prolific when you click "Exit". Copy the completion code "CO9YSVGI".</p><br>'+
               '</div>';
           }  else {
             problem = false;
@@ -389,7 +389,7 @@
         choices: ["Exit"],
         on_finish: function(){
           jatos.submitResultData(jsPsych.data.get().json());
-          jatos.endStudyAndRedirect("https://app.prolific.com/submissions/complete?cc=CHVB4HI7"); // Should redirect and save pp to failed attention check group
+          jatos.endStudyAndRedirect("https://app.prolific.com/submissions/complete?cc=CO9YSVGI"); // Should redirect and save pp to failed attention check group
         }
       };
 

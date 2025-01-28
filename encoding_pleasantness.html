@@ -242,7 +242,7 @@
           if ( no_resp_trial_count > 11){
             problem = true
             termination_stim = '<div><h1>Your involvement has been terminated.</h1>'+
-              '<p style="width:700px">Our research depends upon participants being engaged and concentrating. You did not make a response to more than 70% of the trials on this task. This means your involvement in the study is terminated. This page should redirect you to Prolific when you click "Exit". Copy the completion code "CHVB4HI7".</p><br>'+
+              '<p style="width:700px">Our research depends upon participants being engaged and concentrating. You did not make a response to more than 70% of the trials on this task. This means your involvement in the study is terminated. This page should redirect you to Prolific when you click "Exit". Copy the completion code "CO9YSVGI".</p><br>'+
               '</div>';
             console.log('pp did not respond to more than 70% of trials');
           }
@@ -255,7 +255,7 @@
           if ( fast_trial_count > 11){
             problem = true;
             termination_stim = '<div><h1>Your involvement has been terminated.</h1>'+
-              '<p style="width:700px">Our research depends upon participants being engaged and concentrating. Your involvement in the study has been terminated because the speed of your responses exceeds the threshold for reading each word, deciding upon and making a response. This page should redirect you to Prolific when you click "Exit". Copy the completion code "CHVB4HI7".</p><br>'+
+              '<p style="width:700px">Our research depends upon participants being engaged and concentrating. Your involvement in the study has been terminated because the speed of your responses exceeds the threshold for reading each word, deciding upon and making a response. This page should redirect you to Prolific when you click "Exit". Copy the completion code "CO9YSVGI".</p><br>'+
               '</div>';
             console.log('pp responded too quickly to more than 70% of trials');
           };
@@ -287,7 +287,7 @@
         choices: ["Exit"],
         on_finish: function(){
           jatos.submitResultData(jsPsych.data.get().json());
-          jatos.endStudyAndRedirect("https://app.prolific.com/submissions/complete?cc=CHVB4HI7"); // Should redirect and save pp to failed attention check group
+          jatos.endStudyAndRedirect("https://app.prolific.com/submissions/complete?cc=CO9YSVGI"); // Should redirect and save pp to failed attention check group
         }
       };
 
