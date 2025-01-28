@@ -56,7 +56,7 @@
           jsPsych.data.addProperties({ expGrp: exp_grp });
           jsPsych.data.addProperties({ counterbalance: CB });
           jsPsych.data.addProperties({ taskName: "spot_difference" });
-          jatos.startComponentByPos( 11, jsPsych.data.get().json()); // Component position for the redirect script
+          jatos.startComponentByPos(11, jsPsych.data.get().json()); // Component position for the redirect script
         }
     });
     
@@ -82,17 +82,28 @@
         task_tracker = jatos.studySessionData.taskTracker;
       };
 
-    // Function to change the background colour of screen so pps know when their responses have been recorded
+    // Function to flash a rectanlge on screen so pps know when their responses have been recorded
     // Invoked as part of jspsych's event listeners
-    function change_background(e) {
-        if(e.button == 0) { // 0 refers to left mouse click
-          document.body.style.backgroundColor = '#BFBFBF' // change color as needed
+    function display_orange_rectangle(e) {
+      if (e.button === 0) { // 0 refers to left mouse click
+        // Create the orange rectangle element
+        const rectangle = document.createElement('div');
+        rectangle.style.width = '500px'; // Rectangle width
+        rectangle.style.height = '30px'; // Rectangle height
+        rectangle.style.backgroundColor = 'orange'; // Rectangle color
+        rectangle.style.position = 'fixed';
+        rectangle.style.top = '710px'; // from the top of the screen
+        rectangle.style.left = '15px'; // from the left of the screen
+        rectangle.style.zIndex = '1000'; // Ensure it appears on top of other elements
 
-          // Code below times the colour change out
-            setTimeout(function () {
-              document.body.style.backgroundColor = '#FFFFFF' // change back to white
-            }, 300) // change duration as needed
-        }
+        // Add the rectangle to the document body
+        document.body.appendChild(rectangle);
+
+        // Remove the rectangle after a brief delay
+        setTimeout(() => {
+            document.body.removeChild(rectangle);
+        }, 300); // Duration in milliseconds (change as needed)
+      }
     };
 
 
@@ -184,7 +195,10 @@
         return '<div class="imagepos"><img src= ' + jsPsych.timelineVariable('img_distractor') + '></div>'
         },
       prompt: function(){
-        return '<div class="prompt">There are ' + jsPsych.timelineVariable('num_diff') +' differences here. Click on the left-hand image.</div>'
+        return '<div class="prompt">There are ' + jsPsych.timelineVariable('num_diff') +' differences here. Click on the <b>left-hand image</b>.'+
+          '<br>'+
+          'Number of clicks: 0'+
+          '</div>'
         },
       choices: ['Next'],
       trial_duration: 60000, //trial times out after 1 min
@@ -200,7 +214,7 @@
       // Dynamically add the hidden message to the stimulus
         trial.stimulus += '<p id="hidden-message" style="display:none;">You clicked the mouse button! Here is your message.</p>';
       
-        document.addEventListener("mousedown", change_background); // Screen flashes grey when reponses made
+        document.addEventListener("mousedown", display_orange_rectangle); // Screen flashes grey when reponses made
         
         
       },
@@ -213,7 +227,7 @@
       },
       on_finish: function(data){
 
-        document.removeEventListener("keydown", change_background); // Stops screen flashing grey when response made
+        document.removeEventListener("keydown", display_orange_rectangle); // Stops screen flashing grey when response made
 
         var time_elapsed_vals = jsPsych.data.get().select('time_elapsed').values; //this is getting all the time_elapsed values so far
         var time_to_this_trial = time_elapsed_vals.slice(-1);//get the time elapsed between this trial and the start of the experiment
@@ -251,13 +265,6 @@
       delay_after: 0
     };
     timeline.push(exit_fullscreen);
-
-    var pause_trial = {
-      type: jsPsychHtmlKeyboardResponse,
-      stimulus: 'pause',
-      choices: "ALL_KEYS"
-    };
-    timeline.push(pause_trial);
 
 
     // Check performance for termination

@@ -156,9 +156,9 @@
           "<div class='information-body'>" +
           "<p>The first task will require you to watch a short video." +
           "<br><br>"+
-          "We are interested in the effects of this video on how you feel, and how this in turn affects your responses on later tasks."+
+          "We are interested in the effects of this video on how you feel, and how this in turn affects your performance on later tasks."+
           "<br><br>"+
-          "After watching the video, you will answer some quick questions about your mood.</p>" +
+          "After watching the video, you will answer a question about your mood.</p>" +
           "</div><hr>",
 
           // General
@@ -305,17 +305,28 @@
 
       // Spot Diff ----------------------------------------------------------------------
 
-      // Function to change the background colour of screen so pps know when their responses have been recorded
+      // Function to flash a rectanlge on screen so pps know when their responses have been recorded
       // Invoked as part of jspsych's event listeners
-      function change_background_spotdiff(e) {
-          if(e.button == 0) { // 0 refers to left mouse click
-            document.body.style.backgroundColor = '#BFBFBF' // change color as needed
+      function display_orange_rectangle(e) {
+        if (e.button === 0) { // 0 refers to left mouse click
+          // Create the orange rectangle element
+          const rectangle = document.createElement('div');
+          rectangle.style.width = '500px'; // Rectangle width
+          rectangle.style.height = '30px'; // Rectangle height
+          rectangle.style.backgroundColor = 'orange'; // Rectangle color
+          rectangle.style.position = 'fixed';
+          rectangle.style.top = '710px'; // from the top of the screen
+          rectangle.style.left = '15px'; // from the left of the screen
+          rectangle.style.zIndex = '1000'; // Ensure it appears on top of other elements
 
-            // Code below times the colour change out
-              setTimeout(function () {
-                document.body.style.backgroundColor = '#FFFFFF' // change back to white
-              }, 300) // change duration as needed
-          }
+          // Add the rectangle to the document body
+          document.body.appendChild(rectangle);
+
+          // Remove the rectangle after a brief delay
+          setTimeout(() => {
+              document.body.removeChild(rectangle);
+          }, 300); // Duration in milliseconds (change as needed)
+        }
       };
 
       // Example spot diff
@@ -412,17 +423,17 @@
         data: {
           task: 'spot_diff_prac' // each new trial will be marked in the jspsych data with 'image_trial'
         },
-        // on_start: function (trial) {
-        //   document.addEventListener("mousedown", change_background_spotdiff);
-        // },
+        on_start: function (trial) {
+          document.addEventListener("mousedown", display_orange_rectangle);
+        },
         // extensions: [{ 
         //       type: jsPsychExtensionMouseTracking, //track mouse clicks
         //       params: { events: ['mousedown'] }
         // }],
-        // on_finish: function(data){
-        //   document.removeEventListener("keydown", change_background_spotdiff);
+        on_finish: function(){
+          document.removeEventListener("mousedown", display_orange_rectangle);
 
-        // }
+        }
       };
       timeline.push(spot_diff_prac_trial);
 

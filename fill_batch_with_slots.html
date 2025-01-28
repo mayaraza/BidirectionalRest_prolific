@@ -1,0 +1,153 @@
+<!-- <!DOCTYPE html> -->
+<html>
+  <head>
+    <title>Experiment</title>
+
+    <!-- 
+      Script replaces batch session data with 60 IDs and ppVariables ready to recruit a new batch.
+      Run this ahead of recruiting a new batch.
+      Copy the array of IDs from the console ready to give out to pps in a random order.
+
+    -->
+
+
+    <script src="jatos.js"></script>
+    <script src="jspsych-7.3.0/jspsych.js"></script>
+<!-- load plugins here -->
+
+    <script src="jspsych-7.3.0/plugin-html-keyboard-response.js"></script>
+    <link href="jspsych-7.3.0/jspsych.css" rel="stylesheet" type="text/css" />
+  </head>
+  <body></body>
+  <script>
+
+
+      // OR jatos
+      var jsPsych = initJsPsych({
+        on_finish: function () {
+          jatos.endStudy();
+        }
+      });
+
+      var timeline = [];
+
+      var idNumbersArray, all_slots;
+
+
+      // select 3 random letters for the first half of the ID - called in generateRandomID()
+      function generateRandomString(length) {
+        const characters = 'abcdefghijklmnopqrstuvwxyz';
+        let result = '';
+        for (let i = 0; i < length; i++) {
+          const randomIndex = Math.floor(Math.random() * characters.length);
+          result += characters.charAt(randomIndex);
+        }
+        return result;
+      }
+
+      // Generate random ID made up of 3 letters and 3 numbers - called in idNumbers Array
+      function generateRandomID() {
+        const randomLetters = generateRandomString(3);
+        const randomNumbers = Math.floor(Math.random() * 1000).toString().padStart(3, '0');
+        return randomLetters + randomNumbers;
+      }
+
+
+
+
+
+      // CREATES OBJECT WITH 60 IDs ASSOCIATED WITH RELEVANT PP VARIABLES
+      function generateSlots(){
+
+        // creates an array of 60 random IDs
+        idNumbersArray = Array.from({ length: 60 }, () => generateRandomID());
+        
+
+        // Initialize an empty object to store key-object pairs
+        var keyObjectPairs = {};
+
+
+        // Iterate through the array of ID numbers
+        for (var i = 0; i < idNumbersArray.length; i++) {
+
+          // Calculate counterbalance value (resets to 1 after reaching 12)
+          var counterbalanceValue = ((i + 1) % 12 === 0) ? 12 : (i + 1) % 12;
+
+          // Increment experimental_group every 12 iterations (goes up to 5)
+          var experimentalGroupValue = Math.floor(i / 12) + 1;
+
+          // Use the current ID number as the key
+          var currentID = idNumbersArray[i];
+
+          // Associate the key with the participant variables set to starting values
+          keyObjectPairs[currentID] = {
+            "slot": i + 1,
+            "counterbalance": counterbalanceValue,
+            "experimental_group": experimentalGroupValue,
+            'batch' : "pilot",
+            'session_tracker' : 1 ,
+            'day1_start_time' : null,
+            'day2_start_time' : null,
+            'day3_start_time' : null,
+            'comprehension_attempt' : 0 ,
+            'attention_fails' : 0 ,
+            'terminated' : false,
+            'condition_replaced' : null
+          };
+        };
+
+        return keyObjectPairs;
+      };
+
+
+
+      // Check if any of the keys (PPIDs) are duplicates as this could occur by chance
+      function hasDuplicates(obj) {
+        const keysArray = Object.keys(obj);
+        const keysSet = new Set(keysArray);
+
+        return keysSet.size !== keysArray.length;
+      };
+
+
+      // REPLACE ALL BATCH SESSION DATA
+      function storeSlots(obj){
+
+        // check if any of the PPIDs are duplicate by chance
+        if ( hasDuplicates(obj) ){
+          // if yes print warning to run script again
+          console.log('re-run script bc duplicate IDs have been produced');
+        
+        // if not then fill the batch data
+        } else {
+
+          console.log('These are the PPIDs needing to be recruited:');
+          console.log(Object.keys(obj));
+
+          jatos.batchSession.setAll(obj)
+              .then(() => console.log("Batch Session was successfully updated"))
+              .catch(() => console.log("Batch Session synchronization failed"));
+        }
+      };
+
+
+
+
+      
+      var pause = {
+        type: jsPsychHtmlKeyboardResponse,
+        stimulus: 'Check console'
+      }
+      timeline.push(pause);
+
+
+
+// OR jatos
+jatos.onLoad(() => {
+  all_slots = generateSlots(idNumbersArray); // Create batch session data object - 60 random IDs and ppVariable objects
+  storeSlots(all_slots); // Replace the batch session data with the slots generated
+  jsPsych.run(timeline);
+});
+
+</script>
+</html>
