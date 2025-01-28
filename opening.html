@@ -262,7 +262,7 @@
       var inclusion_crit_termination_message_trial = {
         type: jsPsychHtmlButtonResponse,
         stimulus: '<div><h3>Your involvement has been terminated.</h3>'+
-              '<p style="width:700px">Unfortunately, you do not meet the inclusion criteria for this study which means you cannot take part. This page should redirect to prolific when you press "Exit". Copy the completion code "CWNUV2BU" just in case.</p><br>'+
+              '<p style="width:700px">Unfortunately, you do not meet the inclusion criteria for this study which means you cannot take part. This page should redirect to prolific when you press "Exit". Copy the completion code "CK7RJNN1" just in case.</p><br>'+
               '</div>',
         choices: ["Exit"],
         on_finish: function(){
@@ -276,7 +276,7 @@
 
           // Exit
           jatos.submitResultData(jsPsych.data.get().json());
-          jatos.endStudyAndRedirect("https://app.prolific.com/submissions/complete?cc=CWNUV2BU");
+          jatos.endStudyAndRedirect("https://app.prolific.com/submissions/complete?cc=CK7RJNN1");
         }
       };
 
