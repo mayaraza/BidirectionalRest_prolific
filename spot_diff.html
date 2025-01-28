@@ -63,8 +63,10 @@
     var timeline = [];
 
     // Define global variables
-    var PPID, ppVariables, CB, exp_grp, problem, termination_stim, time_to_instruct, task_tracker, spot_diff_array1, spot_diff_array2;
-    var spot_diff_images = spot_diff_stim_array; // master stim array from stimuli.js - set this up here so that set stim trial works below, and as a fail safe
+    var PPID, ppVariables, CB, exp_grp, problem, termination_stim, time_to_instruct, task_tracker, sample_img_half1, sample_img_half2;
+    var sample_images = [];
+    
+
 
     function retrieveThings(){
         // PP BATCH SESSION DATA
@@ -100,35 +102,44 @@
       stimulus: "",
       choices: "NO_KEYS",
       trial_duration: 1,
-      on_finish: function(){ // assigns spot_diff_images which is the array used in the task timeline below
-
-        if (exp_grp == 4){ // effort-effort group - require stim array to be split so that images do not repeat between tasks
-          
-          if (task_tracker == 1){ // 1st task - create two separate arrays, assign one for now, store one for later
-
-            // Randomise master stim array (Fisher-Yates method)
-            for (let i = spot_diff_images.length - 1; i > 0; i--) {
-              const j = Math.floor(Math.random() * (i + 1));
-              [spot_diff_images[i], spot_diff_images[j]] = [spot_diff_images[j], spot_diff_images[i]];
-            };
-
-            // Split into 2 halves
-            var midpoint = Math.ceil(spot_diff_images.length / 2); // find the middle of the array (if odd number of items then one item will be inlcuded in one array)
-            spot_diff_array1 = spot_diff_images.slice(0, midpoint);
-            spot_diff_array2 = spot_diff_images.slice(midpoint);
-
-            // Store 2nd array in study session data for later
-            jatos.studySessionData.spotDiffStim2 = spot_diff_array2;
-
-            // Assign for use in current task
-            spot_diff_images = spot_diff_array1;
-            
-          } else { // 2nd task - assign array from study session data
-            spot_diff_images = jatos.studySessionData.spotDiffStim2;
-          }
-        };
-        // Don't need to do anything for other groups
+      on_finish: function(){ // Creates an array of indices to sample the spot_diff_stim_array
         
+        // For the EE group, split reassign this so that only half are sampled in current task
+        if (exp_grp != 4){ // All groups except, effort-effort group
+
+            // Create array of indices 1-20 to sample the whole imagee array with equal probability
+            var array20 =  Array.from({ length: 20 }, (_, i) => i); // Creates an array from 0 to 19
+            array20 = jsPsych.randomization.shuffle(array20); // shuffle array so trials are random
+            sample_images.push(...array20); // assign indices to array for use in trial procedure below
+
+        } else { // EE group
+
+          if (task_tracker == 1){ // Task 1 - split index array into two halves
+
+            // Create index array with same process as groups above
+            var array20 =  Array.from({ length: 20 }, (_, i) => i); // Creates an array from 0 to 19
+            array20 = jsPsych.randomization.shuffle(array20); // shuffle array so trials are random
+
+            // Split index array into two for use in each task
+            let half = Math.ceil(array20.length / 2); // Find the middle index
+
+            // Split into two arrays
+            sample_img_half1 = array20.slice(0, half); // First half of the array
+            sample_img_half2 = array20.slice(half); // Second half of the array
+            
+            // Set indices for current task
+            sample_images.push(...sample_img_half1); // assign indices to array for use in trial procedure below
+
+            // Store indices for use in 2nd task
+            jatos.studySessionData.task2SamplingArray = sample_img_half2; // store in study session data
+
+
+          } else { // Task 2 - retrieve sampling array created earlier from study session data
+            sample_img_half2 = jatos.studySessionData.task2SamplingArray;
+            sample_images.push(...sample_img_half2); // assign indices to array for use in trial procedure below
+
+          }
+        }
       }
     };
     timeline.push(set_stim);
@@ -150,8 +161,6 @@
       message: function(){ return "<div class='information-header'><h1> Spot-the-difference Task </h1></div>" + 
           "<br><hr>" +
           "<div class='information-body'><p>" +
-          "<i>You will see the header above and the following reminder before this task:</i>"+
-          "<br><br>"+
           "Click on the differences in the <b>left</b> image. Only click when you find a difference." +
           "<br><br>"+
           "This task will last 5 mins. Please try as hard as you can." +
@@ -162,8 +171,6 @@
           },
       on_finish: function(data){
         time_to_instruct = jsPsych.data.get().select('time_elapsed').values; //finds out how long it took before the pp began the task, needed for task timer
-
-        spot_diff_images= spot_diff_stim_array;
       }
     };
     timeline.push(instruct_fullscreen);
@@ -173,23 +180,28 @@
     var image_trial = {
       type: jsPsychHtmlButtonResponse,
       button_html: '<button class="jspsych-btn button";>%choice%</button>', //positions button so it is visible behind image
-	    stimulus: function(){return '<div class="imagepos"><img src= ' + jsPsych.timelineVariable('img_distractor') + '></div>'},
-      prompt: function(){return '<div class="prompt">There are ' + jsPsych.timelineVariable('num_diff') + ' differences here. Click on the left-hand image.</div>'},
+	    stimulus: function(){
+        return '<div class="imagepos"><img src= ' + jsPsych.timelineVariable('img_distractor') + '></div>'
+        },
+      prompt: function(){
+        return '<div class="prompt">There are ' + jsPsych.timelineVariable('num_diff') +' differences here. Click on the left-hand image.</div>'
+        },
       choices: ['Next'],
-      trial_duration: 10000, //trial times out after 1 min
+      trial_duration: 60000, //trial times out after 1 min
       on_load(params){ //this on load function hides the advance button until at least 1min has passed to make sure pps cannot progress too quickly through the distractor task
-        console.log(time_to_instruct);
+        
         var button = document.getElementById("jspsych-html-button-response-btngroup");
         button.style.visibility = "hidden";
         setTimeout(function() {
           button.style.visibility = "visible";
-        }, 5000); //should be 30000 //hide button until 30s has passed
+        }, 30000); //hide button until 30s has passed
       },
       on_start: function (trial) {
       // Dynamically add the hidden message to the stimulus
         trial.stimulus += '<p id="hidden-message" style="display:none;">You clicked the mouse button! Here is your message.</p>';
       
-        document.addEventListener("mousedown", change_background);
+        document.addEventListener("mousedown", change_background); // Screen flashes grey when reponses made
+        
         
       },
 	    extensions: [{ 
@@ -200,13 +212,15 @@
         task: 'image_trial' // each new trial will be marked in the jspsych data with 'image_trial'
       },
       on_finish: function(data){
-        document.removeEventListener("keydown", change_background);
+
+        document.removeEventListener("keydown", change_background); // Stops screen flashing grey when response made
 
         var time_elapsed_vals = jsPsych.data.get().select('time_elapsed').values; //this is getting all the time_elapsed values so far
         var time_to_this_trial = time_elapsed_vals.slice(-1);//get the time elapsed between this trial and the start of the experiment
         var time_since_task_start = parseFloat(time_to_this_trial) - parseFloat(time_to_instruct);//get the time since the start of the task by taking away the time for the instructions
+        
         //if the time is greater than 5mins then finish the trial, save the data, and end the current timeline (ie. end this task).
-        if (time_since_task_start > 30000){ // should be 300000
+        if (time_since_task_start > 300000){ // 5 min task duration
           jsPsych.finishTrial(data);
           jsPsych.endCurrentTimeline();
         }
@@ -217,8 +231,15 @@
     // Timeline for trials
     var spot_diff_procedure = {
       timeline: [image_trial],
-      timeline_variables: spot_diff_images,
-      randomize_order: true
+      timeline_variables: spot_diff_stim_array,
+      on_timeline_start: function(){
+        console.log(sample_images)
+      },
+      //randomize_order: true,
+      sample: {
+            type: 'custom',
+            fn: function(){return sample_images} // From set_stim trial - note for this method to work you have to 'push' the indices to the array, not assign them
+      }
     };
     timeline.push(spot_diff_procedure);
 
@@ -230,6 +251,13 @@
       delay_after: 0
     };
     timeline.push(exit_fullscreen);
+
+    var pause_trial = {
+      type: jsPsychHtmlKeyboardResponse,
+      stimulus: 'pause',
+      choices: "ALL_KEYS"
+    };
+    timeline.push(pause_trial);
 
 
     // Check performance for termination

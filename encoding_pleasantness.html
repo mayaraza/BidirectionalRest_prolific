@@ -157,35 +157,18 @@
       fullscreen_mode: true,
       message: function(){
         return "<div class='banner'><h2>Pleasantness Task</h2></div>" + // banner from CSS at top
-            "<div>"+
-            "<h2>F = PLEASANT&emsp;/&emsp;J = UNPLEASANT</h2>"+
-            "<br><br>"+
-            "<p>Does the word feel pleasant or unpleasant?</p>"+
-            "<br><br>"+
-            "<p>Click to begin and enter full screen mode.</p>"+
-            "<br><br>"+
-            "</div>"
+        "<br><hr>" +    
+        "<div>"+
+        "<h2>F = PLEASANT&emsp;/&emsp;J = UNPLEASANT</h2>"+
+        "<br><br>"+
+        "<p>Does the word feel pleasant or unpleasant?</p>"+
+        "<br><br>"+
+        "<p>Click to begin and enter full screen mode.</p>"+
+        "<br><br>"+
+        "</div><hr>"
       }
     };
     timeline.push(instruct_fullscreen);
-
-      // // Instruction reminder
-      // var encoding_instruct_reminder = {
-      //     type: jsPsychHtmlKeyboardResponse,
-      //     stimulus: function(){
-      //       return "<div class='banner'><h2>Pleasantness Task</h2></div>" + // banner from CSS at top
-      //       "<div>"+
-      //       "<h2>F = PLEASANT&emsp;/&emsp;J = UNPLEASANT</h2>"+
-      //       "<br><br>"+
-      //       "Does the word feel pleasant or unpleasant?"+
-      //       "<br><br>"+
-      //       "<p>Hover your forefingers over the F and J keys. Press the F or J key to begin.</p>"+
-      //       "</div>"
-      //     },
-      //     choices: ['f','j']
-      //     //post_trial_gap: 500 // don't have this cos it will make the banner flash
-      // };
-      // timeline.push(encoding_instruct_reminder);
 
 
       // Cycle through word list
@@ -223,7 +206,7 @@
           timeline_variables: master_word_stim,
           sample: {
             type: 'custom',
-            fn: function(){return stim_indices} // From set_stim trial
+            fn: function(){return stim_indices} // From set_stim trial - note for this method to work you have to 'push' the indices to the array, not assign them
           }
       };
       timeline.push(encoding_procedure);
