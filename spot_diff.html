@@ -196,8 +196,7 @@
         },
       prompt: function(){
         return '<div class="prompt">There are ' + jsPsych.timelineVariable('num_diff') +' differences here. Click on the <b>left-hand image</b>.'+
-          '<br>'+
-          'Number of clicks: 0'+
+          '<br>'
           '</div>'
         },
       choices: ['Next'],
@@ -223,11 +222,12 @@
             params: { events: ['mousedown'] }
       }],
       data: {
-        task: 'image_trial' // each new trial will be marked in the jspsych data with 'image_trial'
+        task: 'image_trial',
+        timestamp: Date.now()
       },
       on_finish: function(data){
 
-        document.removeEventListener("keydown", display_orange_rectangle); // Stops screen flashing grey when response made
+        document.removeEventListener("mousedown", display_orange_rectangle); // Stops screen flashing grey when response made
 
         var time_elapsed_vals = jsPsych.data.get().select('time_elapsed').values; //this is getting all the time_elapsed values so far
         var time_to_this_trial = time_elapsed_vals.slice(-1);//get the time elapsed between this trial and the start of the experiment
@@ -274,9 +274,6 @@
       choices: "NO_KEYS",
       trial_duration: 1,
       on_start: function(data){
-
-        // Line below not working but might be fine as mousetracking extension not used in subsequent scripts so might cancel listener?
-        document.removeEventListener("keydown", change_background); // ensures event listener for changing background colour is not still running
 
         // Get the trial data
         var spot_diff_data = jsPsych.data.get().filter({ task : 'image_trial'});
